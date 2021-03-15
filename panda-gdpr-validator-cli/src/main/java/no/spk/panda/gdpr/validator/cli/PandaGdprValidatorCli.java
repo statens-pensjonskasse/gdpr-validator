@@ -1,8 +1,13 @@
 package no.spk.panda.gdpr.validator.cli;
 
+import static picocli.CommandLine.*;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import picocli.CommandLine;
@@ -15,13 +20,16 @@ import picocli.CommandLine;
 public class PandaGdprValidatorCli implements Callable<Integer> {
 
     private static final int TOTALT_FEIL = 1;
+    public static final int FIL_FEIL = 2;
 
+    @Parameters(description = "Spesifiser ønsket bane å sjekke i")
+    private String bane;
 
     @Option(names = {"-m", "--modus"}, required = true, description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer)")
     private String modus;
 
-    @Option(names = {"-b", "--bane"}, description = "Spesifiser ønsket bane å sjekke i")
-    private String bane;
+    @Option(names = {"-t", "--typer"}, description = "Spesifiser ønsket filtype å sjekke i")
+    private List<String> filtyper;
 
     @Override
     public Integer call() {
@@ -30,12 +38,21 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
         try {
             switch (modus) {
                 case "fødselsnummer":
-                    System.out.format("Leter etter fødselsnummere i %s og validerer dem...\n", bane);
-                    FoedselsnummerSjekker foedselsnummerSjekker = new FoedselsnummerSjekker();
-                    return foedselsnummerSjekker.sjekk(bane);
+                    if (filtyper == null) {
+                        filtyper = new ArrayList<>();
+                        System.out.format("Leter etter fødselsnummere i %s med alle filtyper og validerer dem...\n", bane);
+                    } else {
+                        System.out.format("Leter etter fødselsnummere i %s med filtyper %s og validerer dem...\n", bane, filtyper);
+                    }
+
+                    final FoedselsnummerSjekkerModus foedselsnummerSjekker = new FoedselsnummerSjekkerModus(bane, filtyper);
+                    return foedselsnummerSjekker.sjekk();
                 default:
                     throw new RuntimeException("Ukjent modus");
             }
+        } catch (FileNotFoundException ex) {
+            System.out.format("Forsøkte å åpne en fil som ikke eksisterer: %s\n", ex.getMessage());
+            return FIL_FEIL;
         } catch (Exception ex) {
             System.out.format("Exception ble kastet: %s\n", ex.getMessage());
             return TOTALT_FEIL;

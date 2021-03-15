@@ -15,7 +15,7 @@ public class Foedselsnummer {
     private static final int INDIVIDNUMMER_SLUTT = 9;
     private static final int SJEKKSUM_START = 9;
     private static final int SJEKKSUM_SLUTT = 11;
-    public static final int NORSK_FØDSELSNUMMER_LENGDE = 11;
+    private static final int NORSK_FØDSELSNUMMER_LENGDE = 11;
 
     private final String fødselsnummer;
     private final Optional<String> datoDel;
@@ -25,7 +25,7 @@ public class Foedselsnummer {
     private Foedselsnummer(final String fødselsnummer) {
         this.fødselsnummer = requireNonNull(fødselsnummer, "fødselsnummer er påkrevd, men var null");
 
-        if (this.fødselsnummer.length() == 11) {
+        if (this.fødselsnummer.length() == NORSK_FØDSELSNUMMER_LENGDE) {
             this.datoDel = Optional.of(fødselsnummer.substring(DATO_START, DATO_SLUTT));
             this.individnummerDel = Optional.of(fødselsnummer.substring(INDIVIDNUMMER_START, INDIVIDNUMMER_SLUTT));
             this.sjekksumDel = Optional.of(fødselsnummer.substring(SJEKKSUM_START, SJEKKSUM_SLUTT));
@@ -132,5 +132,14 @@ public class Foedselsnummer {
 
     private static Date datoFraStreng(final String dato, final String pattern) throws ParseException {
         return new SimpleDateFormat(pattern).parse(dato);
+    }
+
+    @Override
+    public String toString() {
+        return "Foedselsnummer{" +
+                "fødselsnummer='" + fødselsnummer + '\'' +
+                " er gyldig='" + erGyldig() + '\'' +
+                " er nesten gyldig='" + erNestenGyldig() + '\'' +
+                '}';
     }
 }
