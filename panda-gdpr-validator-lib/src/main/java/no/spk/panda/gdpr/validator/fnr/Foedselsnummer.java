@@ -127,11 +127,15 @@ public class Foedselsnummer {
     }
 
     private static Date datoFraStreng(final String dato) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd").parse(dato);
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        date.setLenient(false);
+        return date.parse(dato);
     }
 
     private static Date datoFraStreng(final String dato, final String pattern) throws ParseException {
-        return new SimpleDateFormat(pattern).parse(dato);
+        SimpleDateFormat date = new SimpleDateFormat(pattern);
+        date.setLenient(false);
+        return date.parse(dato);
     }
 
     @Override

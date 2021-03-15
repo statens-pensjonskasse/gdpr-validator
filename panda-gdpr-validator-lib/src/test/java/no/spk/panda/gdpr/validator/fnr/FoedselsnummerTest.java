@@ -10,6 +10,7 @@ import org.junit.Test;
 
 public class FoedselsnummerTest {
 
+    @SuppressWarnings({"ArraysAsListWithZeroOrOneArgument", "RedundantOperationOnEmptyContainer"})
     @Test
     public void skal_returnere_true_ved_gyldig_fødselsnummere() {
         // Hent fødselsnummere å teste med her: http://www.fnrinfo.no/Verktoy/FinnLovlige_Tilfeldig.aspx
@@ -30,8 +31,9 @@ public class FoedselsnummerTest {
                 "asd",
                 "11111111111",
                 "62130012345",
-                "12121211111",
-                "a1111111111"
+                "92121211111",
+                "a1111111111",
+                "00000000000"
         );
 
         ugyldigeFødselsnummere

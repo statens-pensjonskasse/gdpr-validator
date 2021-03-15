@@ -27,18 +27,28 @@ public class FoedselsnummerSjekkerModus {
         resultater = new ArrayList<>();
     }
 
-    public Integer sjekk() throws FileNotFoundException {
-        final File fil = new File(bane);
+    public void sjekk() throws FileNotFoundException {
+        sjekk(new File(bane));
 
-        if (!fil.exists()) {
+        resultater
+                .forEach(r ->
+                        System.out.format(
+                                "Fødselsnummer: %s, fil: %s\n",
+                                r.fødselsnummer(), r.filbane()
+                        )
+                );
+    }
+
+    private void sjekk(final File fil) throws FileNotFoundException {
+        if (fil == null || !fil.exists()) {
             throw new FileNotFoundException("Filen/katalogen eksisterer ikke.");
         } else if (fil.isFile()) {
             sjekkEnkeltfil(fil);
         } else if (fil.isDirectory()) {
-            sjekkKatalog(bane);
+            for (final File underfil : requireNonNull(fil.listFiles())) {
+                sjekk(underfil);
+            }
         }
-
-        return 0;
     }
 
     private void sjekkEnkeltfil(final File fil) throws FileNotFoundException {
@@ -55,18 +65,6 @@ public class FoedselsnummerSjekkerModus {
                         fil.getAbsolutePath()
                 )
         );
-
-        resultater
-                .forEach(r ->
-                        System.out.format(
-                                "Fødselsnummer: %s, fil: %s\n",
-                                r.fødselsnummer(), r.filbane()
-                        )
-                );
-    }
-
-    private void sjekkKatalog(final String bane) {
-
     }
 
     private String finnFiletternavn(final File fil) {
