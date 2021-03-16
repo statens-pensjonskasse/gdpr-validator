@@ -1,5 +1,10 @@
 package no.spk.panda.gdpr.validator.cli;
 
+import static no.spk.panda.gdpr.validator.cli.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.LokaleKatalogerFoedselsnummerSjekkerModus.lokaleKatalogerFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.Util.repositorynavn;
+import static no.spk.panda.gdpr.validator.cli.Util.tilLowercase;
+import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForSemikolonValidator;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Parameters;
@@ -7,12 +12,7 @@ import static picocli.CommandLine.Parameters;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 
 import picocli.CommandLine;
 
@@ -27,7 +27,8 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
     private static final int OK = 0;
     private static final int TOTALT_FEIL = 1;
     public static final int FIL_FEIL = 2;
-    public static final int UKJENT_MODUS_FEIL = 3;
+    public static final int GIT_FEIL = 3;
+    public static final int UKJENT_MODUS_FEIL = 4;
 
     @Parameters(description = "Spesifiser ønsket bane å sjekke i")
     private String bane;
@@ -44,8 +45,6 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        final FoedselsnummerSjekkerModus foedselsnummerSjekker;
-
         try {
             switch (modus) {
                 case "fødselsnummer":
@@ -56,8 +55,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                         System.out.format("Leter etter fødselsnummere i %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                     }
 
-                    foedselsnummerSjekker = new FoedselsnummerSjekkerModus(bane, tilLowercase(filtyper));
-                    foedselsnummerSjekker.sjekk();
+                    lokaleKatalogerFoedselsnummerSjekkerModus(bane, tilLowercase(filtyper)).kjør();
 
                     return OK;
                 case "kaspernummer":
@@ -65,18 +63,12 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                 case "fødselsnummer_med_semikolon":
                     if (filtyper == null) {
                         filtyper = new ArrayList<>();
-                        System.out.format("Leter etter fødselsnummere med semikolon i Git-repoet %s med alle filtyper og validerer dem...\n\n", bane);
+                        System.out.format("Leter etter fødselsnummere med semikolon i %s med alle filtyper og validerer dem...\n\n", bane);
                     } else {
-                        System.out.format("Leter etter fødselsnummere med semikolon i Git-repoet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
+                        System.out.format("Leter etter fødselsnummere med semikolon i %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                     }
 
-                    foedselsnummerSjekker = new FoedselsnummerSjekkerModus(
-                            bane,
-                            tilLowercase(filtyper),
-                            ValidatorParametere.forSemikolonValidator()
-                    );
-
-                    foedselsnummerSjekker.sjekk();
+                    lokaleKatalogerFoedselsnummerSjekkerModus(bane, tilLowercase(filtyper), parametereForSemikolonValidator()).kjør();
 
                     return OK;
                 case "fødselsnummer_ett_repo":
@@ -86,6 +78,11 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     } else {
                         System.out.format("Leter etter fødselsnummere i Git-repoet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                     }
+
+                    gitRepoFoedselsnummerSjekkerModus(
+                            lokaleKatalogerFoedselsnummerSjekkerModus(repositorynavn(bane), tilLowercase(filtyper))
+                    )
+                            .sjekkEttRepo(bane);
 
                     return OK;
                 case "fødselsnummer_alle_repoer":
@@ -104,6 +101,9 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
         } catch (final FileNotFoundException ex) {
             System.out.format("Forsøkte å åpne en fil som ikke eksisterer: %s\n", ex.getMessage());
             return FIL_FEIL;
+        } catch (final FantIkkeGitRepositoryException ex) {
+            System.out.println(ex.getMessage());
+            return GIT_FEIL;
         } catch (final Exception ex) {
             System.out.format("Exception ble kastet: %s\n", ex.getMessage());
             return TOTALT_FEIL;
@@ -116,9 +116,5 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
         final int exitCode = commandLine.execute(args);
 
         System.exit(exitCode);
-    }
-
-    private static List<String> tilLowercase(final List<String> lst) {
-        return lst.stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toUnmodifiableList());
     }
 }

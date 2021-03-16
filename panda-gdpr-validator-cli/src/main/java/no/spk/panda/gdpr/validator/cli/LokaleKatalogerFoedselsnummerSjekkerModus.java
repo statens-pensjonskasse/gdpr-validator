@@ -2,7 +2,9 @@ package no.spk.panda.gdpr.validator.cli;
 
 import static java.util.Objects.requireNonNull;
 import static no.spk.panda.gdpr.validator.cli.Resultat.resultat;
+import static no.spk.panda.gdpr.validator.cli.Util.filetternavn;
 import static no.spk.panda.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
+import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 
 import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 
-public class FoedselsnummerSjekkerModus {
+class LokaleKatalogerFoedselsnummerSjekkerModus {
 
     private final Pattern fødselsnummerRegex;
     private final ValidatorParametere validatorParametere;
@@ -26,14 +28,14 @@ public class FoedselsnummerSjekkerModus {
     private final boolean skalFiltrerePåFiletternavn;
     private final List<Resultat> resultater;
 
-    public FoedselsnummerSjekkerModus(
+    private LokaleKatalogerFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper
     ) {
-        this(bane, filtyper, ValidatorParametere.forOrdinærValidator());
+        this(bane, filtyper, parametereForOrdinærValidator());
     }
 
-    public FoedselsnummerSjekkerModus(
+    private LokaleKatalogerFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper,
             final ValidatorParametere validatorParametere
@@ -47,7 +49,22 @@ public class FoedselsnummerSjekkerModus {
         resultater = new ArrayList<>();
     }
 
-    public void sjekk() throws FileNotFoundException {
+    public static LokaleKatalogerFoedselsnummerSjekkerModus lokaleKatalogerFoedselsnummerSjekkerModus(
+            final String bane,
+            final List<String> filtyper
+    ) {
+        return new LokaleKatalogerFoedselsnummerSjekkerModus(bane, filtyper);
+    }
+
+    public static LokaleKatalogerFoedselsnummerSjekkerModus lokaleKatalogerFoedselsnummerSjekkerModus(
+            final String bane,
+            final List<String> filtyper,
+            final ValidatorParametere validatorParametere
+    ) {
+        return new LokaleKatalogerFoedselsnummerSjekkerModus(bane, filtyper, validatorParametere);
+    }
+
+    public void kjør() throws FileNotFoundException {
         sjekk(new File(bane));
 
         resultater
@@ -67,7 +84,7 @@ public class FoedselsnummerSjekkerModus {
     }
 
     private void sjekkEnkeltfil(final File fil) throws FileNotFoundException {
-        if (skalFiltrerePåFiletternavn && !filtyper.contains(finnFiletternavn(fil).toLowerCase(Locale.ROOT))) {
+        if (skalFiltrerePåFiletternavn && !filtyper.contains(filetternavn(fil).toLowerCase(Locale.ROOT))) {
             return;
         }
 
@@ -75,12 +92,10 @@ public class FoedselsnummerSjekkerModus {
                 new Scanner(fil)
                         .findAll(fødselsnummerRegex)
                         .map(MatchResult::group)
-                        .map(potensieltFødselsnummer -> resultat(foedslesnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath()))
+                        .map(potensieltFødselsnummer ->
+                                resultat(foedslesnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath())
+                        )
                         .collect(Collectors.toUnmodifiableList())
                 );
-    }
-
-    private String finnFiletternavn(final File fil) {
-        return fil.getAbsolutePath().substring(fil.getAbsolutePath().lastIndexOf(".") + 1);
     }
 }

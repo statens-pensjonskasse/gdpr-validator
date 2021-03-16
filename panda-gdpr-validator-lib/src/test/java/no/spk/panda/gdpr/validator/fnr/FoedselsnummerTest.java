@@ -1,6 +1,8 @@
 package no.spk.panda.gdpr.validator.fnr;
 
 import static no.spk.panda.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
+import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
+import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForSemikolonValidator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -20,7 +22,7 @@ public class FoedselsnummerTest {
 
         gyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, ValidatorParametere.forOrdinærValidator()).erNestenGyldig())
+                        assertThat(foedslesnummer(fnr, parametereForOrdinærValidator()).erNestenGyldig())
                                 .isTrue()
                 );
     }
@@ -35,14 +37,14 @@ public class FoedselsnummerTest {
 
         gyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, ValidatorParametere.forSemikolonValidator()).erNestenGyldig())
+                        assertThat(foedslesnummer(fnr, parametereForSemikolonValidator()).erNestenGyldig())
                                 .isTrue()
                 );
     }
 
     @Test
     public void skal_returnere_false_ved_ugyldige_fødselsnummere() {
-        final ValidatorParametere validatorParametere = ValidatorParametere.forOrdinærValidator();
+        final ValidatorParametere validatorParametere = parametereForOrdinærValidator();
 
         final List<String> ugyldigeFødselsnummere = Arrays.asList(
                 "asd",

@@ -2,7 +2,7 @@ package no.spk.panda.gdpr.validator.cli;
 
 import no.spk.panda.gdpr.validator.fnr.Foedselsnummer;
 
-public class Resultat {
+class Resultat {
 
     private final Foedselsnummer fødselsnummer;
     private final String filbane;

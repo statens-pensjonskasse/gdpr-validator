@@ -31,7 +31,7 @@ public class ValidatorParametere {
         this.mønster = mønster;
     }
 
-    public static ValidatorParametere forOrdinærValidator() {
+    public static ValidatorParametere parametereForOrdinærValidator() {
         // DDMMYYIIISS
         final int DATO_START = 0;
         final int DATO_SLUTT = 6;
@@ -52,7 +52,7 @@ public class ValidatorParametere {
         );
     }
 
-    public static ValidatorParametere forSemikolonValidator() {
+    public static ValidatorParametere parametereForSemikolonValidator() {
         // YYYYMMDD;IIISS
         final int DATO_START = 0;
         final int DATO_SLUTT = 8;
