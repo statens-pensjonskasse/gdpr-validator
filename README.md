@@ -26,10 +26,10 @@ java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-hV] -m=<modus> 
 Eksempel:
 
 ```sh
-java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar -m fødselsnummer -t feature -t md -t java panda-fakturering/ > fnr-pf.txt
+java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar -m fødselsnummer -t feature -t md -t java -t csv -t -t xml sh -t txt -t sql -t r -t js -t ts -t html -t css panda-fakturering/ > fnr-pf.txt
 ```
 
 Parametere er:
 
-- **m: modus**. Det eksisterer kun en modus for øyeblikket: fødselsnummer.
+- **m: modus**. Moduser: fødselsnummer, fødselsnummer_med_semikolon (Kasper-fødselsnummer).
 - **t: filtype**. En liste av filtyper å sjekke data i. Angi som liste på denne måten: `-t filtype1 -t filtype2`.

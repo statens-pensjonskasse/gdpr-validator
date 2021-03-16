@@ -16,11 +16,11 @@ public class Resultat {
         return new Resultat(fødselsnummer, filbane);
     }
 
-    public Foedselsnummer fødselsnummer() {
-        return fødselsnummer;
-    }
-
-    public String filbane() {
-        return filbane;
+    @Override
+    public String toString() {
+        return "Resultat{" +
+                fødselsnummer +
+                ", filbane='" + filbane + '\'' +
+                '}';
     }
 }

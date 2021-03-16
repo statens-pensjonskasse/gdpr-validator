@@ -12,22 +12,39 @@ public class FoedselsnummerTest {
 
     @SuppressWarnings({"ArraysAsListWithZeroOrOneArgument", "RedundantOperationOnEmptyContainer"})
     @Test
-    public void skal_returnere_true_ved_gyldig_fødselsnummere() {
+    public void skal_returnere_true_ved_gyldig_fødselsnummer_for_ordinær_fødselsnummervalidering() {
         // Hent fødselsnummere å teste med her: http://www.fnrinfo.no/Verktoy/FinnLovlige_Tilfeldig.aspx
         // Slett fødselsnummerene før commit.
 
-        List<String> gyldigeFødselsnummere = Arrays.asList();
+        final List<String> gyldigeFødselsnummere = Arrays.asList();
 
         gyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr).erNestenGyldig())
+                        assertThat(foedslesnummer(fnr, ValidatorParametere.forOrdinærValidator()).erNestenGyldig())
+                                .isTrue()
+                );
+    }
+
+    @SuppressWarnings({"ArraysAsListWithZeroOrOneArgument", "RedundantOperationOnEmptyContainer"})
+    @Test
+    public void skal_returnere_true_ved_gyldig_fødselsnummer_for_semikolon_fødselsnummervalidering() {
+        // Hent fødselsnummere å teste med her: http://www.fnrinfo.no/Verktoy/FinnLovlige_Tilfeldig.aspx
+        // Slett fødselsnummerene før commit.
+
+        final List<String> gyldigeFødselsnummere = Arrays.asList();
+
+        gyldigeFødselsnummere
+                .forEach(fnr ->
+                        assertThat(foedslesnummer(fnr, ValidatorParametere.forSemikolonValidator()).erNestenGyldig())
                                 .isTrue()
                 );
     }
 
     @Test
     public void skal_returnere_false_ved_ugyldige_fødselsnummere() {
-        List<String> ugyldigeFødselsnummere = Arrays.asList(
+        final ValidatorParametere validatorParametere = ValidatorParametere.forOrdinærValidator();
+
+        final List<String> ugyldigeFødselsnummere = Arrays.asList(
                 "asd",
                 "11111111111",
                 "62130012345",
@@ -38,13 +55,13 @@ public class FoedselsnummerTest {
 
         ugyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr).erGyldig())
+                        assertThat(foedslesnummer(fnr, validatorParametere).erGyldig())
                                 .isFalse()
                 );
 
         ugyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr).erNestenGyldig())
+                        assertThat(foedslesnummer(fnr, validatorParametere).erNestenGyldig())
                                 .isFalse()
                 );
     }
