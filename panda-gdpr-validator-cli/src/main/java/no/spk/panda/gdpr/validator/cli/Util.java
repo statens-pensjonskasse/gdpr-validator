@@ -1,9 +1,13 @@
 package no.spk.panda.gdpr.validator.cli;
 
+import static no.spk.panda.gdpr.validator.cli.KommandoHjelper.kommandoHjelper;
+
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+
+import org.assertj.core.util.Lists;
 
 class Util {
 
@@ -37,5 +41,14 @@ class Util {
 
     private static boolean harRepositorynavn(final String bane) {
         return bane.lastIndexOf("/") != -1;
+    }
+
+    static boolean erGitUrl(final String bane) {
+        return filetternavn(bane).equals("git") &&
+                (bane.contains("http://") || bane.contains("https://") || bane.contains("git://") || bane.contains("ssh://"));
+    }
+
+    static void klonRepo(final String url) {
+        kommandoHjelper().kjoerKommando(Lists.newArrayList("git", "clone", url, repositorynavn(url)));
     }
 }

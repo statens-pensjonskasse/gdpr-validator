@@ -20,16 +20,42 @@ Hent `panda-gdpr-validator-cli-*-jar-with-dependencies.jar*` fra *panda-gdpr-val
 kjører man:
 
 ```sh
-java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-hV] -m=<modus> [-t=<filtyper>]... <bane>
+java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-hV] [-f=<fnrtype>] -m=<modus> [-t=<filtyper>]... <bane>
 ```
 
-Eksempel:
+Eksempel lokalt filsystem:
 
 ```sh
-java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar -m fødselsnummer -t feature -t md -t java -t csv -t -t xml sh -t txt -t sql -t r -t js -t ts -t html -t css panda-fakturering/ > fnr-pf.txt
+java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
+  -m fødselsnummer \
+  -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
+  panda-fakturering/ > fnr.txt
+```
+
+Eksempel enkelt Git-repository:
+
+```sh
+java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
+  -m fødselsnummer_ett_repo \
+  -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
+  http://git.spk.no/scm/pnd/panda-fakturering-aggregering.git > fnr.txt
+```
+
+Eksempel alle Git-repositories i et prosjekt:
+
+```sh
+java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
+  -m fødselsnummer_alle_repoer \
+  -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
+  PND > fnr.txt
 ```
 
 Parametere er:
 
-- **m: modus**. Moduser: fødselsnummer, fødselsnummer_med_semikolon (Kasper-fødselsnummer).
+- **m: modus**. Moduser: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer.
+    * Modusen fødselsnummer sjekker det lokale filsystemet.
+    * Modusen fødselsnummer_ett_repo sjekker et Git-repository. Repositoryet blir lastet ned.
+    * Modusen fødselsnummer_alle_repoer sjekket alle Git-repositoryer i ett prosjekt (f.eks. PND eller PER). Alle repositoryene blir lastet ned.
+- **f: fnrtype**. Fødselsnummertype. Enten ordinær (ddMMyyiiiss), kasper (yyyyMMddiiiss) eller kasper_med_semikolon (yyyyMMdd;iiiss).
 - **t: filtype**. En liste av filtyper å sjekke data i. Angi som liste på denne måten: `-t filtype1 -t filtype2`.
+

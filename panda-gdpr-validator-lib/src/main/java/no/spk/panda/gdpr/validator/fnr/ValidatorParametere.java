@@ -52,7 +52,28 @@ public class ValidatorParametere {
         );
     }
 
-    public static ValidatorParametere parametereForSemikolonValidator() {
+    public static ValidatorParametere parametereForKasperValidator() {
+        // YYYYMMDDIIISS
+        final int DATO_START = 0;
+        final int DATO_SLUTT = 8;
+        final int INDIVIDNUMMER_START = 8;
+        final int INDIVIDNUMMER_SLUTT = 11;
+        final int SJEKKSUM_START = 11;
+        final int SJEKKSUM_SLUTT = 13;
+        final int FØDSELSNUMMER_LENGDE = 13;
+        final String FØDSELSDATO_MØNSTER = "yyyyMMdd";
+        final Pattern MØNSTER = Pattern.compile("(\\d{13})");
+
+        return new ValidatorParametere(
+                DATO_START, DATO_SLUTT,
+                INDIVIDNUMMER_START, INDIVIDNUMMER_SLUTT,
+                SJEKKSUM_START, SJEKKSUM_SLUTT,
+                FØDSELSNUMMER_LENGDE, FØDSELSDATO_MØNSTER,
+                MØNSTER
+        );
+    }
+
+    public static ValidatorParametere parametereForKasperMedSemikolonValidator() {
         // YYYYMMDD;IIISS
         final int DATO_START = 0;
         final int DATO_SLUTT = 8;

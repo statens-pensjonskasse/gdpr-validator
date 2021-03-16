@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 
-class LokaleKatalogerFoedselsnummerSjekkerModus {
+class LokalFoedselsnummerSjekkerModus {
 
     private final Pattern fødselsnummerRegex;
     private final ValidatorParametere validatorParametere;
@@ -28,14 +28,14 @@ class LokaleKatalogerFoedselsnummerSjekkerModus {
     private final boolean skalFiltrerePåFiletternavn;
     private final List<Resultat> resultater;
 
-    private LokaleKatalogerFoedselsnummerSjekkerModus(
+    private LokalFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper
     ) {
         this(bane, filtyper, parametereForOrdinærValidator());
     }
 
-    private LokaleKatalogerFoedselsnummerSjekkerModus(
+    private LokalFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper,
             final ValidatorParametere validatorParametere
@@ -49,19 +49,19 @@ class LokaleKatalogerFoedselsnummerSjekkerModus {
         resultater = new ArrayList<>();
     }
 
-    public static LokaleKatalogerFoedselsnummerSjekkerModus lokaleKatalogerFoedselsnummerSjekkerModus(
+    public static LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper
     ) {
-        return new LokaleKatalogerFoedselsnummerSjekkerModus(bane, filtyper);
+        return new LokalFoedselsnummerSjekkerModus(bane, filtyper);
     }
 
-    public static LokaleKatalogerFoedselsnummerSjekkerModus lokaleKatalogerFoedselsnummerSjekkerModus(
+    public static LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper,
             final ValidatorParametere validatorParametere
     ) {
-        return new LokaleKatalogerFoedselsnummerSjekkerModus(bane, filtyper, validatorParametere);
+        return new LokalFoedselsnummerSjekkerModus(bane, filtyper, validatorParametere);
     }
 
     public void kjør() throws FileNotFoundException {

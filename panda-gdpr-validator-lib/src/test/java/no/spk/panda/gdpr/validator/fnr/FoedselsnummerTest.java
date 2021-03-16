@@ -2,7 +2,7 @@ package no.spk.panda.gdpr.validator.fnr;
 
 import static no.spk.panda.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
-import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForSemikolonValidator;
+import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class FoedselsnummerTest {
 
         gyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, parametereForSemikolonValidator()).erNestenGyldig())
+                        assertThat(foedslesnummer(fnr, parametereForKasperMedSemikolonValidator()).erNestenGyldig())
                                 .isTrue()
                 );
     }
