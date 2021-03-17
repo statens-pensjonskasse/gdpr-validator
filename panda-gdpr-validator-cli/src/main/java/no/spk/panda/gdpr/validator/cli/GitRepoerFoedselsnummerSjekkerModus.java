@@ -42,7 +42,7 @@ class GitRepoerFoedselsnummerSjekkerModus {
     public void sjekkMangeRepoer(final String prosjekt) throws IOException {
         final List<GitRepo> repoer = hentRepoerDataFraApi(prosjekt);
 
-        for (GitRepo repo : repoer) {
+        for (final GitRepo repo : repoer) {
             gitRepoFoedselsnummerSjekkerModus(
                     lokalFoedselsnummerSjekkerModus(repositorynavn(repo.url()), filtyper, validatorParametere)
             ).sjekkEttRepo(repo.url());

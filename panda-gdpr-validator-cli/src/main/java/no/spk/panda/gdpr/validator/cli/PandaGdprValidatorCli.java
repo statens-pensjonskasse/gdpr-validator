@@ -6,6 +6,7 @@ import static no.spk.panda.gdpr.validator.cli.LokalFoedselsnummerSjekkerModus.lo
 import static no.spk.panda.gdpr.validator.cli.Util.tilLowercase;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
+import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Parameters;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 
 import picocli.CommandLine;
 
@@ -100,17 +103,17 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
             final List<String> filtyper
     ) throws IOException {
 
-        final LokalFoedselsnummerSjekkerModus lokal;
+        final ValidatorParametere parametere;
 
         switch (fnrtype) {
             case "ordinær":
-                lokal = lokalFoedselsnummerSjekkerModus(bane, filtyper);
+                parametere = parametereForOrdinærValidator();
                 break;
             case "kasper":
-                lokal = lokalFoedselsnummerSjekkerModus(bane, filtyper, parametereForKasperValidator());
+                parametere = parametereForKasperValidator();
                 break;
             case "kasper_med_semikolon":
-                lokal = lokalFoedselsnummerSjekkerModus(bane, filtyper, parametereForKasperMedSemikolonValidator());
+                parametere = parametereForKasperMedSemikolonValidator();
                 break;
             default:
                 throw new UkjentInngangsParameterException(String.format("Fødselsnummertypen \"%s\" er ukjent.\n", fnrtype));
@@ -124,7 +127,8 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                lokal.kjør();
+                lokalFoedselsnummerSjekkerModus(bane, filtyper, parametere)
+                        .kjør();
                 break;
             case "fødselsnummer_ett_repo":
                 if (filtyper.isEmpty()) {
@@ -133,7 +137,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-repoet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoFoedselsnummerSjekkerModus(lokal)
+                gitRepoFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerModus(bane, filtyper, parametere))
                         .sjekkEttRepo(bane);
                 break;
             case "fødselsnummer_alle_repoer":
@@ -143,7 +147,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-prosjektet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoerFoedselsnummerSjekkerModus(filtyper, parametereForKasperValidator())
+                gitRepoerFoedselsnummerSjekkerModus(filtyper, parametere)
                         .sjekkMangeRepoer("PND");
                 break;
             default:
