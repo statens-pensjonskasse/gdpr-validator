@@ -148,7 +148,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                 }
 
                 gitRepoerFoedselsnummerSjekkerModus(filtyper, parametere)
-                        .sjekkMangeRepoer("PND");
+                        .sjekkMangeRepoer(bane);
                 break;
             default:
                 throw new UkjentInngangsParameterException(String.format("Modusen \"%s\" er ukjent.\n", modus));
