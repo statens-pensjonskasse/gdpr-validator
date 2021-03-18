@@ -4,8 +4,10 @@ GDPR-validator
 GDPR-validator inneholder kode som sjekker om prosjekter etterlever GDPR.
 
 Per dags dato inneholder det kun et CLI-verktøy som sjekker om det eksisterer fødselsnummere i filene i en folder,
-eller en enkeltfil, og hvorvidt de er gyldige eller ikke.
+en enkeltfil, et repository eller alle repositories i et prosjekt, og hvorvidt de er gyldige eller ikke.
 
+Det ble opprinnelig laget for å sjekke om Panda-prosjektet inneholder gyldige fødselsnummere i koden sin, men er
+åpent for å bli brukt av alle.
 
 Hvordan bygge GDPR-validator
 ====================================
