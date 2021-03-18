@@ -1,19 +1,19 @@
-Panda GDPR-validator
+GDPR-validator
 =====================================
 
-Panda GDPR-validator inneholder kode som sjekker om Panda-prosjektet etterlever GDPR.
+GDPR-validator inneholder kode som sjekker om prosjekter etterlever GDPR.
 
 Per dags dato inneholder det kun et CLI-verktøy som sjekker om det eksisterer fødselsnummere i filene i en folder,
 eller en enkeltfil, og hvorvidt de er gyldige eller ikke.
 
 
-Hvordan bygge Panda GDPR-validator
+Hvordan bygge GDPR-validator
 ====================================
 
 I rotmappen av prosjektet, kjør ```mvn clean install```.
 
 
-Hvordan testkjøre Panda GDPR-validator
+Hvordan kjøre GDPR-validator
 ========================================
 
 Hent `panda-gdpr-validator-cli-*-jar-with-dependencies.jar*` fra *panda-gdpr-validator/panda-gdpr-validator-cli/target*. Deretter
@@ -23,29 +23,32 @@ kjører man:
 java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-hV] [-f=<fnrtype>] -m=<modus> [-t=<filtyper>]... <bane>
 ```
 
-Eksempel lokalt filsystem:
+Eksempel lokalt filsystem med ordinære fødselsnummere:
 
 ```sh
 java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
   -m fødselsnummer \
+  -f ordinær \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
   panda-fakturering/ > fnr.txt
 ```
 
-Eksempel enkelt Git-repository:
+Eksempel enkelt Git-repository med kasper-fødselsnummere:
 
 ```sh
 java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
   -m fødselsnummer_ett_repo \
+  -f kasper \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
   http://git.spk.no/scm/pnd/panda-fakturering-aggregering.git > fnr.txt
 ```
 
-Eksempel alle Git-repositories i et prosjekt:
+Eksempel alle Git-repositories i et prosjekt med kasper-fødselsnummere (separert med semikolon mellom dato og resten):
 
 ```sh
 java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
   -m fødselsnummer_alle_repoer \
+  -f kasper_med_semikolon \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
   PND > fnr.txt
 ```
