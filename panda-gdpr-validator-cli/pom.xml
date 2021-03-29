@@ -3,7 +3,7 @@
     <parent>
         <groupId>no.spk.panda.gdpr.validator</groupId>
         <artifactId>panda-gdpr-validator-pom</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>no.spk.panda.gdpr.validator</groupId>
             <artifactId>panda-gdpr-validator-lib</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

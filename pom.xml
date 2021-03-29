@@ -12,7 +12,7 @@
     <groupId>no.spk.panda.gdpr.validator</groupId>
     <artifactId>panda-gdpr-validator-pom</artifactId>
     <name>panda-gdpr-validator-pom</name>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <description>
         Validering av kode med hensyn til GDPR.
