@@ -2,6 +2,7 @@ package no.spk.panda.gdpr.validator.cli;
 
 import static java.util.Objects.requireNonNull;
 import static no.spk.panda.gdpr.validator.cli.Resultat.resultat;
+import static no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger.visAlleUtgangsvariabler;
 import static no.spk.panda.gdpr.validator.cli.Util.filetternavn;
 import static no.spk.panda.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
@@ -22,6 +23,7 @@ class LokalFoedselsnummerSjekkerModus {
 
     private final Pattern fødselsnummerRegex;
     private final ValidatorParametere validatorParametere;
+    private final UtgangsInnstillinger utgangsInnstillinger;
 
     private final String bane;
     private final List<String> filtyper;
@@ -32,18 +34,20 @@ class LokalFoedselsnummerSjekkerModus {
             final String bane,
             final List<String> filtyper
     ) {
-        this(bane, filtyper, parametereForOrdinærValidator());
+        this(bane, filtyper, parametereForOrdinærValidator(), visAlleUtgangsvariabler());
     }
 
     private LokalFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper,
-            final ValidatorParametere validatorParametere
+            final ValidatorParametere validatorParametere,
+            final UtgangsInnstillinger utgangsInnstillinger
     ) {
         this.bane = requireNonNull(bane, "bane var påkrevd, men var null");
         this.filtyper = requireNonNull(filtyper, "filtyper var påkrevd, men var null");
         this.validatorParametere = requireNonNull(validatorParametere, "validatorParametere var påkrevd, men var null");
         this.fødselsnummerRegex = validatorParametere.mønster();
+        this.utgangsInnstillinger = requireNonNull(utgangsInnstillinger, "utgangsInnstillinger var påkrevd, men var null");
 
         skalFiltrerePåFiletternavn = filtyper.size() > 0;
         resultater = new ArrayList<>();
@@ -59,16 +63,21 @@ class LokalFoedselsnummerSjekkerModus {
     public static LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus(
             final String bane,
             final List<String> filtyper,
-            final ValidatorParametere validatorParametere
+            final ValidatorParametere validatorParametere,
+            final UtgangsInnstillinger utgangsInnstillinger
     ) {
-        return new LokalFoedselsnummerSjekkerModus(bane, filtyper, validatorParametere);
+        return new LokalFoedselsnummerSjekkerModus(bane, filtyper, validatorParametere, utgangsInnstillinger);
     }
 
     public void kjør() throws FileNotFoundException {
         sjekk(new File(bane));
 
+        if (utgangsInnstillinger.visOppsummering()) {
+            System.out.println(Resultat.lagOppsummering(resultater));
+        }
+
         resultater
-                .forEach(System.out::println);
+                .forEach(r -> System.out.println(r.filtrertOutput(utgangsInnstillinger)));
     }
 
     private void sjekk(final File fil) throws FileNotFoundException {

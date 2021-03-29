@@ -25,26 +25,32 @@ class GitRepoerFoedselsnummerSjekkerModus {
 
     private final List<String> filtyper;
     private final ValidatorParametere validatorParametere;
+    private final UtgangsInnstillinger utgangsInnstillinger;
 
-    private GitRepoerFoedselsnummerSjekkerModus(final List<String> filtyper, final ValidatorParametere validatorParametere) {
+    private GitRepoerFoedselsnummerSjekkerModus(
+            final List<String> filtyper,
+            final ValidatorParametere validatorParametere,
+            final UtgangsInnstillinger utgangsInnstillinger
+    ) {
         this.filtyper = filtyper;
         this.validatorParametere = validatorParametere;
+        this.utgangsInnstillinger = utgangsInnstillinger;
     }
 
     public static GitRepoerFoedselsnummerSjekkerModus gitRepoerFoedselsnummerSjekkerModus(
             final List<String> filtyper,
-            final ValidatorParametere validatorParametere
+            final ValidatorParametere validatorParametere,
+            final UtgangsInnstillinger utgangsInnstillinger
     ) {
-        return new GitRepoerFoedselsnummerSjekkerModus(filtyper, validatorParametere);
+        return new GitRepoerFoedselsnummerSjekkerModus(filtyper, validatorParametere, utgangsInnstillinger);
     }
-
 
     public void sjekkMangeRepoer(final String prosjekt) throws IOException {
         final List<GitRepo> repoer = hentRepoerDataFraApi(prosjekt);
 
         for (final GitRepo repo : repoer) {
             gitRepoFoedselsnummerSjekkerModus(
-                    lokalFoedselsnummerSjekkerModus(repositorynavn(repo.url()), filtyper, validatorParametere)
+                    lokalFoedselsnummerSjekkerModus(repositorynavn(repo.url()), filtyper, validatorParametere, utgangsInnstillinger)
             ).sjekkEttRepo(repo.url());
         }
     }

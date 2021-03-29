@@ -25,6 +25,10 @@ public class Foedselsnummer {
         return validator.erNestenGyldig();
     }
 
+    public String fødselsnummer() {
+        return fødselsnummer;
+    }
+
     @Override
     public String toString() {
         return "fødselsnummer='" + fødselsnummer + '\'' +
