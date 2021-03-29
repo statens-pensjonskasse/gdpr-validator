@@ -155,9 +155,11 @@
                 <groupId>external.atlassian.jgitflow</groupId>
                 <artifactId>jgitflow-maven-plugin</artifactId>
                 <configuration>
-                    <!-- see goals wiki page for configuration options -->
+                    <allowSnapshots>true</allowSnapshots>
                     <noDeploy>true</noDeploy>
-                    <pushReleases>false</pushReleases>
+                    <pushReleases>true</pushReleases>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <scmCommentPrefix>[jgitflow-maven-plugin]-</scmCommentPrefix>
                     <!-- MJF-183: For å unngå at jgitflow skal skrive om pom.xml med crlf ved kvar jævla release -->
                     <eol>lf</eol>
                 </configuration>
