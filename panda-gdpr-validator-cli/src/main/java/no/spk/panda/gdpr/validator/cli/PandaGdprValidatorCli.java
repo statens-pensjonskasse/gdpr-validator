@@ -4,6 +4,7 @@ import static no.spk.panda.gdpr.validator.cli.GitRepoFoedselsnummerSjekkerModus.
 import static no.spk.panda.gdpr.validator.cli.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
 import static no.spk.panda.gdpr.validator.cli.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
 import static no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger.utgangsInnstillinger;
+import static no.spk.panda.gdpr.validator.cli.Util.repositorynavn;
 import static no.spk.panda.gdpr.validator.cli.Util.tilLowercase;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
@@ -160,7 +161,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-repoet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerModus(bane, filtyper, parametere, utgangsInnstillinger))
+                gitRepoFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerModus(repositorynavn(bane), filtyper, parametere, utgangsInnstillinger))
                         .sjekkEttRepo(bane);
                 break;
             case "fødselsnummer_alle_repoer":

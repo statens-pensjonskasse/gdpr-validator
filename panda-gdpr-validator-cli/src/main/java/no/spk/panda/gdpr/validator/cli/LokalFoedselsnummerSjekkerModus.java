@@ -82,7 +82,7 @@ class LokalFoedselsnummerSjekkerModus {
 
     private void sjekk(final File fil) throws FileNotFoundException {
         if (fil == null || !fil.exists()) {
-            throw new FileNotFoundException("Filen/katalogen eksisterer ikke.");
+            throw new FileNotFoundException(String.format("Filen/katalogen eksisterer ikke: %s.", fil != null ? fil.getAbsolutePath() : "null"));
         } else if (fil.isFile()) {
             sjekkEnkeltfil(fil);
         } else if (fil.isDirectory()) {
