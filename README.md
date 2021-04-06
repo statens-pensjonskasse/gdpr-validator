@@ -12,14 +12,19 @@ Det ble opprinnelig laget for å sjekke om Panda-prosjektet inneholder gyldige f
 Hvordan bygge GDPR-validator
 ====================================
 
-I rotmappen av prosjektet, kjør ```mvn clean install```.
+I rotmappen av prosjektet, kjør `mvn clean install`.
+
+For å bygge et GraalVM native-image, kjør `mvn clean install -Dnative`. For at dette skal fungere må man ha GraalVM
+installert, samt native-image. Man får da en native binærfil.
 
 
 Hvordan kjøre GDPR-validator
 ========================================
 
-Hent `panda-gdpr-validator-cli-*-jar-with-dependencies.jar*` fra *panda-gdpr-validator/panda-gdpr-validator-cli/target*. Deretter
-kjører man:
+Hent `panda-gdpr-validator-cli-*-jar-with-dependencies.jar*` fra *panda-gdpr-validator/panda-gdpr-validator-cli/target*.
+Eventuelt kan man hente `gdprvalidator` fra samme mappe, hvis man har bygget et native-image.
+
+Deretter kjører man:
 
 ```sh
 java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-bghnoV] [-f=<fnrtype>] -m=<modus> [-t=<filtyper>]... <bane>

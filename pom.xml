@@ -27,6 +27,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <slf4j.version>1.7.30</slf4j.version>
+        <picocli.version>4.6.1</picocli.version>
+        <graalvm.version>21.0.0.2</graalvm.version>
 
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
@@ -113,6 +115,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <excludedGroups>native-image</excludedGroups>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -143,9 +148,15 @@
                     <target>11</target>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>info.picocli</groupId>
+                            <artifactId>picocli-codegen</artifactId>
+                            <version>${picocli.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                     <compilerArgs>
-                        <arg>-Xlint:all</arg>
-                        <arg>-Werror</arg>
+                        <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -223,6 +234,7 @@
                         <include>**/*IT.class</include>
                         <include>**/*AT.class</include>
                     </includes>
+                    <groups>native-image</groups>
                 </configuration>
             </plugin>
         </plugins>
@@ -230,6 +242,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.graalvm.sdk</groupId>
+                <artifactId>graal-sdk</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -263,7 +281,7 @@
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>4.5.2</version>
+                <version>${picocli.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
