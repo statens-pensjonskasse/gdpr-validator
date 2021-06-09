@@ -12,17 +12,22 @@ Det ble opprinnelig laget for å sjekke om Panda-prosjektet inneholder gyldige f
 Hvordan bygge GDPR-validator
 ====================================
 
-I rotmappen av prosjektet, kjør ```mvn clean install```.
+I rotmappen av prosjektet, kjør `mvn clean install`.
+
+For å bygge et GraalVM native-image, kjør `mvn clean install -Dnative`. For at dette skal fungere må man ha GraalVM
+installert, samt native-image. Man får da en native binærfil.
 
 
 Hvordan kjøre GDPR-validator
 ========================================
 
-Hent `panda-gdpr-validator-cli-*-jar-with-dependencies.jar*` fra *panda-gdpr-validator/panda-gdpr-validator-cli/target*. Deretter
-kjører man:
+Hent `panda-gdpr-validator-cli-*-jar-with-dependencies.jar*` fra *panda-gdpr-validator/panda-gdpr-validator-cli/target*.
+Eventuelt kan man hente `gdprvalidator` fra samme mappe, hvis man har bygget et native-image.
+
+Deretter kjører man:
 
 ```sh
-java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-hV] [-f=<fnrtype>] -m=<modus> [-t=<filtyper>]... <bane>
+java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar [-bghnoV] [-f=<fnrtype>] -m=<modus> [-t=<filtyper>]... <bane>
 ```
 
 Eksempel lokalt filsystem med ordinære fødselsnummere:
@@ -32,6 +37,7 @@ java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
   -m fødselsnummer \
   -f ordinær \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
+  --visOppsummering --visGyldighet --visNestenGyldighet --visOppsummering \
   panda-fakturering/ > fnr.txt
 ```
 
@@ -42,6 +48,7 @@ java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
   -m fødselsnummer_ett_repo \
   -f kasper \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
+  --visOppsummering --visGyldighet --visOppsummering \
   http://git.spk.no/scm/pnd/panda-fakturering-aggregering.git > fnr.txt
 ```
 
@@ -52,6 +59,7 @@ java -jar panda-gdpr-validator-cli-*-jar-with-dependencies.jar \
   -m fødselsnummer_alle_repoer \
   -f kasper_med_semikolon \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
+  --visGyldighet --visNestenGyldighet --visOppsummering \
   PND > fnr.txt
 ```
 
@@ -63,4 +71,7 @@ Parametere er:
     * Modusen fødselsnummer_alle_repoer sjekket alle Git-repositoryer i ett prosjekt (f.eks. PND eller PER). Alle repositoryene blir lastet ned.
 - **f: fnrtype**. Fødselsnummertype. Enten ordinær (ddMMyyiiiss), kasper (yyyyMMddiiiss) eller kasper_med_semikolon (yyyyMMdd;iiiss).
 - **t: filtype**. En liste av filtyper å sjekke data i. Angi som liste på denne måten: `-t filtype1 -t filtype2`.
-
+- **o: visOppsummering**. Vis oppsummering av resultatene.
+- **g: visGyldighet**. Vis gyldighet av fødselsnummer.
+- **n: visNestenGyldighet**. Vis nesten gyldighet av fødselsnummer.
+- **b: visFilbane**. Vis filbanen fødselsnummeret eksisterer i.

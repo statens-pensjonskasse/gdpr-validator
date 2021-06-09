@@ -3,6 +3,8 @@ package no.spk.panda.gdpr.validator.cli;
 import static no.spk.panda.gdpr.validator.cli.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
 import static no.spk.panda.gdpr.validator.cli.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
 import static no.spk.panda.gdpr.validator.cli.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger.utgangsInnstillinger;
+import static no.spk.panda.gdpr.validator.cli.Util.repositorynavn;
 import static no.spk.panda.gdpr.validator.cli.Util.tilLowercase;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
@@ -22,10 +24,10 @@ import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 import picocli.CommandLine;
 
 @SuppressWarnings("unused")
-@Command(name = "pandagdprvalidator",
+@Command(name = "gdprvalidator",
         mixinStandardHelpOptions = true,
         description = "Validerer GDPR-relatert data.",
-        version = "pandagdprvalidator 0.0.1"
+        version = "gdprvalidator 0.0.2"
 )
 public class PandaGdprValidatorCli implements Callable<Integer> {
 
@@ -36,25 +38,45 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
     private static final int UKJENT_MODUS_FEIL = 4;
     private static final int UKJENT_INNGANGSVERDI_FEIL = 5;
 
-    @Parameters(description = "Spesifiser ønsket bane å sjekke i")
+    @Parameters(description = "Spesifiser ønsket bane å sjekke i.")
     private String bane;
 
     @Option(names = {"-m", "--modus"},
             required = true,
-            description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer)"
+            description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer)."
     )
     private String modus;
 
     @Option(names = {"-f", "--fnrtype"},
-            description = "Spesifiser fødselsnummertype (tilgjengelig: ordinær, kasper, kasper_med_semikolon)",
+            description = "Spesifiser fødselsnummertype (tilgjengelig: ordinær, kasper, kasper_med_semikolon).",
             defaultValue = "ordinær"
     )
     private String fnrtype;
 
     @Option(names = {"-t", "--filtype"},
-            description = "Spesifiser ønsket filtype å sjekke i"
+            description = "Spesifiser ønsket filtype å sjekke i."
     )
     private List<String> filtyper;
+
+    @Option(names = {"-o", "--visOppsummering"},
+            description = "Vis oppsummering av resultatene."
+    )
+    private boolean visOppsummering;
+
+    @Option(names = {"-g", "--visGyldighet"},
+            description = "Vis gyldighet av fødselsnummer."
+    )
+    private boolean visGyldighet;
+
+    @Option(names = {"-n", "--visNestenGyldighet"},
+            description = "Vis nesten gyldighet av fødselsnummer."
+    )
+    private boolean visNestenGyldighet;
+
+    @Option(names = {"-b", "--visFilbane"},
+            description = "Vis filbanen fødselsnummeret eksisterer i."
+    )
+    private boolean visFilbane;
 
     @Override
     public Integer call() {
@@ -67,7 +89,8 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                 case "fødselsnummer":
                 case "fødselsnummer_ett_repo":
                 case "fødselsnummer_alle_repoer":
-                    foedselsnummerSjekk(modus, fnrtype, bane, tilLowercase(filtyper));
+                    final UtgangsInnstillinger utgangsInnstillinger = utgangsInnstillinger(visOppsummering, visGyldighet, visNestenGyldighet, visFilbane);
+                    foedselsnummerSjekk(modus, fnrtype, bane, tilLowercase(filtyper), utgangsInnstillinger);
                     return OK;
                 default:
                     System.out.format("Modusen \"%s\" er ukjent.\n", modus);
@@ -100,7 +123,8 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
             final String modus,
             final String fnrtype,
             final String bane,
-            final List<String> filtyper
+            final List<String> filtyper,
+            final UtgangsInnstillinger utgangsInnstillinger
     ) throws IOException {
 
         final ValidatorParametere parametere;
@@ -127,7 +151,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                lokalFoedselsnummerSjekkerModus(bane, filtyper, parametere)
+                lokalFoedselsnummerSjekkerModus(bane, filtyper, parametere, utgangsInnstillinger)
                         .kjør();
                 break;
             case "fødselsnummer_ett_repo":
@@ -137,7 +161,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-repoet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerModus(bane, filtyper, parametere))
+                gitRepoFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerModus(repositorynavn(bane), filtyper, parametere, utgangsInnstillinger))
                         .sjekkEttRepo(bane);
                 break;
             case "fødselsnummer_alle_repoer":
@@ -147,7 +171,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-prosjektet %s med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoerFoedselsnummerSjekkerModus(filtyper, parametere)
+                gitRepoerFoedselsnummerSjekkerModus(filtyper, parametere, utgangsInnstillinger)
                         .sjekkMangeRepoer(bane);
                 break;
             default:
