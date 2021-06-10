@@ -34,6 +34,14 @@ public class FoedselsnummerValidator {
         return new FoedselsnummerValidator(fødselsnummer, parametere);
     }
 
+    public String fødselsdato() {
+        return datoDel.orElse("");
+    }
+
+    public String personnummer() {
+        return individnummerDel.orElse("") + sjekksumDel.orElse("");
+    }
+
     public boolean erGyldig() {
         return erRiktigLengde() && erGyldigFoedselsdato() && erGyldigIndividnummer(true) && erGyldigSjekksum();
     }

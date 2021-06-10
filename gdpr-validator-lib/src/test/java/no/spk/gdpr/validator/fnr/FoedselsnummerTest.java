@@ -1,6 +1,7 @@
 package no.spk.gdpr.validator.fnr;
 
 import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
+import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +66,91 @@ public class FoedselsnummerTest {
                 .forEach(fnr ->
                         assertThat(foedslesnummer(fnr, validatorParametere).erNestenGyldig())
                                 .isFalse()
+                );
+    }
+
+    @Test
+    public void skal_være_et_verdiobjekt() {
+        final ValidatorParametere validatorParametere = parametereForOrdinærValidator();
+
+        assertThat(
+                foedslesnummer("11111111111", validatorParametere)
+        )
+                .isEqualTo(
+                        foedslesnummer("11111111111", validatorParametere)
+                );
+
+        assertThat(
+                foedslesnummer("11111111111", validatorParametere)
+        )
+                .isNotEqualTo(
+                        foedslesnummer("11111111112", validatorParametere)
+                );
+    }
+
+    @Test
+    public void skal_returnere_fødselsdato() {
+        final ValidatorParametere validatorParametereForOrdinær = parametereForOrdinærValidator();
+
+        assertThat(
+                foedslesnummer("11111122222", validatorParametereForOrdinær)
+                        .fødselsdato()
+        )
+                .isEqualTo(
+                        "111111"
+                );
+
+        final ValidatorParametere validatorParametereForKasper = parametereForKasperValidator();
+
+        assertThat(
+                foedslesnummer("3311111122222", validatorParametereForKasper)
+                        .fødselsdato()
+        )
+                .isEqualTo(
+                        "33111111"
+                );
+
+        final ValidatorParametere validatorParametereForKasperMedSemikolon = parametereForKasperMedSemikolonValidator();
+
+        assertThat(
+                foedslesnummer("33111111;22222", validatorParametereForKasperMedSemikolon)
+                        .fødselsdato()
+        )
+                .isEqualTo(
+                        "33111111"
+                );
+    }
+
+    @Test
+    public void skal_returnere_personnummer() {
+        final ValidatorParametere validatorParametereForOrdinær = parametereForOrdinærValidator();
+
+        assertThat(
+                foedslesnummer("11111122222", validatorParametereForOrdinær)
+                        .personnummer()
+        )
+                .isEqualTo(
+                        "22222"
+                );
+
+        final ValidatorParametere validatorParametereForKasper = parametereForKasperValidator();
+
+        assertThat(
+                foedslesnummer("3311111122222", validatorParametereForKasper)
+                        .personnummer()
+        )
+                .isEqualTo(
+                        "22222"
+                );
+
+        final ValidatorParametere validatorParametereForKasperMedSemikolon = parametereForKasperMedSemikolonValidator();
+
+        assertThat(
+                foedslesnummer("33111111;22222", validatorParametereForKasperMedSemikolon)
+                        .personnummer()
+        )
+                .isEqualTo(
+                        "22222"
                 );
     }
 }

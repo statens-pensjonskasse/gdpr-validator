@@ -28,10 +28,33 @@ public class Foedselsnummer {
         return fødselsnummer;
     }
 
+    public String fødselsdato() {
+        return validator.fødselsdato();
+    }
+
+    public String personnummer() {
+        return validator.personnummer();
+    }
+
     @Override
     public String toString() {
         return "fødselsnummer='" + fødselsnummer + '\'' +
                 " er gyldig='" + erGyldig() + '\'' +
                 " er nesten gyldig='" + erNestenGyldig() + '\'';
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final Foedselsnummer that = (Foedselsnummer) o;
+
+        return fødselsnummer.equals(that.fødselsnummer);
+    }
+
+    @Override
+    public int hashCode() {
+        return fødselsnummer.hashCode();
     }
 }
