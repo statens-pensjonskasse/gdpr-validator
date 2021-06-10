@@ -1,12 +1,14 @@
-package no.spk.panda.gdpr.validator.cli;
+package no.spk.panda.gdpr.validator.cli.moduser;
 
 import static java.util.Objects.requireNonNull;
-import static no.spk.panda.gdpr.validator.cli.Util.erGitUrl;
-import static no.spk.panda.gdpr.validator.cli.Util.klonRepo;
+import static no.spk.panda.gdpr.validator.cli.util.Util.erGitUrl;
+import static no.spk.panda.gdpr.validator.cli.util.Util.klonRepo;
 
 import java.io.FileNotFoundException;
 
-class GitRepoFoedselsnummerSjekkerModus {
+import no.spk.panda.gdpr.validator.cli.FantIkkeGitRepositoryException;
+
+public class GitRepoFoedselsnummerSjekkerModus {
 
     private final LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus;
 

@@ -1,11 +1,12 @@
 package no.spk.panda.gdpr.validator.cli;
 
-import static no.spk.panda.gdpr.validator.cli.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
-import static no.spk.panda.gdpr.validator.cli.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
-import static no.spk.panda.gdpr.validator.cli.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.moduser.AnonymiserGrunnlagsdataModus.anonymiserGrunnlagsdataModus;
+import static no.spk.panda.gdpr.validator.cli.moduser.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.moduser.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
 import static no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger.utgangsInnstillinger;
-import static no.spk.panda.gdpr.validator.cli.Util.repositorynavn;
-import static no.spk.panda.gdpr.validator.cli.Util.tilLowercase;
+import static no.spk.panda.gdpr.validator.cli.util.Util.repositorynavn;
+import static no.spk.panda.gdpr.validator.cli.util.Util.tilLowercase;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
@@ -27,9 +28,9 @@ import picocli.CommandLine;
 @Command(name = "gdprvalidator",
         mixinStandardHelpOptions = true,
         description = "Validerer GDPR-relatert data.",
-        version = "gdprvalidator 0.0.2"
+        version = "gdprvalidator 0.0.3"
 )
-public class PandaGdprValidatorCli implements Callable<Integer> {
+public class GdprValidatorCli implements Callable<Integer> {
 
     private static final int OK = 0;
     private static final int TOTALT_FEIL = 1;
@@ -43,7 +44,7 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
 
     @Option(names = {"-m", "--modus"},
             required = true,
-            description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer)."
+            description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer, anonymiser_grunnlagsdata)."
     )
     private String modus;
 
@@ -92,6 +93,10 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
                     final UtgangsInnstillinger utgangsInnstillinger = utgangsInnstillinger(visOppsummering, visGyldighet, visNestenGyldighet, visFilbane);
                     foedselsnummerSjekk(modus, fnrtype, bane, tilLowercase(filtyper), utgangsInnstillinger);
                     return OK;
+                case "anonymiser_grunnlagsdata":
+                    final UtgangsInnstillinger utgangsInnstillinger2 = utgangsInnstillinger(visOppsummering, visGyldighet, visNestenGyldighet, visFilbane);
+                    anonymiserGrunnlagsdata(fnrtype, bane, tilLowercase(filtyper), utgangsInnstillinger2);
+                    return OK;
                 default:
                     System.out.format("Modusen \"%s\" er ukjent.\n", modus);
                     return UKJENT_MODUS_FEIL;
@@ -112,21 +117,14 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
     }
 
     public static void main(final String... args) {
-        final CommandLine commandLine = new CommandLine(new PandaGdprValidatorCli());
+        final CommandLine commandLine = new CommandLine(new GdprValidatorCli());
 
         final int exitCode = commandLine.execute(args);
 
         System.exit(exitCode);
     }
 
-    private static void foedselsnummerSjekk(
-            final String modus,
-            final String fnrtype,
-            final String bane,
-            final List<String> filtyper,
-            final UtgangsInnstillinger utgangsInnstillinger
-    ) throws IOException {
-
+    private static ValidatorParametere velgParametereFraCmdLineArgs(final String fnrtype) {
         final ValidatorParametere parametere;
 
         switch (fnrtype) {
@@ -142,6 +140,19 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
             default:
                 throw new UkjentInngangsParameterException(String.format("Fødselsnummertypen \"%s\" er ukjent.\n", fnrtype));
         }
+
+        return parametere;
+    }
+
+    private static void foedselsnummerSjekk(
+            final String modus,
+            final String fnrtype,
+            final String bane,
+            final List<String> filtyper,
+            final UtgangsInnstillinger utgangsInnstillinger
+    ) throws IOException {
+
+        final ValidatorParametere parametere = velgParametereFraCmdLineArgs(fnrtype);
 
         switch (modus) {
             case "fødselsnummer":
@@ -177,5 +188,22 @@ public class PandaGdprValidatorCli implements Callable<Integer> {
             default:
                 throw new UkjentInngangsParameterException(String.format("Modusen \"%s\" er ukjent.\n", modus));
         }
+    }
+
+    private static void anonymiserGrunnlagsdata(
+            final String fnrtype,
+            final String bane,
+            final List<String> filtyper,
+            final UtgangsInnstillinger utgangsInnstillinger
+    ) throws IOException {
+
+        if (filtyper.isEmpty()) {
+            System.out.format("Anonymiserer grunnlagsdata i %s med alle filtyper og fødsesnummertype %s...\n\n", bane, fnrtype);
+        } else {
+            System.out.format("Anonymiserer grunnlagsdata i %s med filtyper %s og fødselsnummertype %s...\n\n", bane, filtyper, fnrtype);
+        }
+
+        anonymiserGrunnlagsdataModus(fnrtype, bane, filtyper, utgangsInnstillinger)
+                .anonymiser();
     }
 }

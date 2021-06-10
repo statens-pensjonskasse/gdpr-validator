@@ -5,7 +5,7 @@ import java.util.List;
 
 import no.spk.panda.gdpr.validator.fnr.Foedselsnummer;
 
-class Resultat {
+public class Resultat {
 
     private final Foedselsnummer fødselsnummer;
     private final String filbane;
@@ -46,7 +46,7 @@ class Resultat {
     public static String lagOppsummering(final List<Resultat> resultater) {
         String oppsummering = "Oppsummering:\n\n";
 
-        oppsummering += String.format("Avsluttet %s\n\n", LocalDateTime.now().toString());
+        oppsummering += String.format("Avsluttet %s\n\n", LocalDateTime.now());
         oppsummering += String.format("Fant %d fødselsnummere:\n", resultater.size());
         oppsummering += String.format("\t- %d er gyldig(e)\n", resultater.stream().filter(f -> f.fødselsnummer.erGyldig()).count());
         oppsummering += String.format("\t- %d er nesten gyldig(e)\n", resultater.stream().filter(f -> f.fødselsnummer.erNestenGyldig()).count());

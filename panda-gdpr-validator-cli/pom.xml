@@ -28,7 +28,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>no.spk.panda.gdpr.validator.cli.PandaGdprValidatorCli</mainClass>
+                            <mainClass>no.spk.panda.gdpr.validator.cli.GdprValidatorCli</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

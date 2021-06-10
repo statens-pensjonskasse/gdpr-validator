@@ -1,4 +1,4 @@
-package no.spk.panda.gdpr.validator.cli;
+package no.spk.panda.gdpr.validator.cli.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +14,7 @@ public class KommandoHjelper {
         return new KommandoHjelper();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public Stream<String> kjoerKommando(final List<String> programOgArgumenter) {
         try {
             final Process process = new ProcessBuilder(programOgArgumenter).start();

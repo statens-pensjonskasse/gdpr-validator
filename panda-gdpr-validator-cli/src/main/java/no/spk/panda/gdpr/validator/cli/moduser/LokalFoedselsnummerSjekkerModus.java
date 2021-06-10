@@ -1,9 +1,8 @@
-package no.spk.panda.gdpr.validator.cli;
+package no.spk.panda.gdpr.validator.cli.moduser;
 
 import static java.util.Objects.requireNonNull;
 import static no.spk.panda.gdpr.validator.cli.Resultat.resultat;
 import static no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger.visAlleUtgangsvariabler;
-import static no.spk.panda.gdpr.validator.cli.Util.filetternavn;
 import static no.spk.panda.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
 import static no.spk.panda.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 
@@ -17,9 +16,12 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import no.spk.panda.gdpr.validator.cli.Resultat;
+import no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger;
+import no.spk.panda.gdpr.validator.cli.util.Util;
 import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 
-class LokalFoedselsnummerSjekkerModus {
+public class LokalFoedselsnummerSjekkerModus {
 
     private final Pattern fødselsnummerRegex;
     private final ValidatorParametere validatorParametere;
@@ -93,7 +95,7 @@ class LokalFoedselsnummerSjekkerModus {
     }
 
     private void sjekkEnkeltfil(final File fil) throws FileNotFoundException {
-        if (skalFiltrerePåFiletternavn && !filtyper.contains(filetternavn(fil).toLowerCase(Locale.ROOT))) {
+        if (skalFiltrerePåFiletternavn && !filtyper.contains(Util.filetternavn(fil).toLowerCase(Locale.ROOT))) {
             return;
         }
 

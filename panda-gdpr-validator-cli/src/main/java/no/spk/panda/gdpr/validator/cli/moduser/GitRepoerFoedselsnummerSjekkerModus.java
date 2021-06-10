@@ -1,15 +1,17 @@
-package no.spk.panda.gdpr.validator.cli;
+package no.spk.panda.gdpr.validator.cli.moduser;
 
 import static java.util.Objects.requireNonNull;
-import static no.spk.panda.gdpr.validator.cli.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
-import static no.spk.panda.gdpr.validator.cli.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
-import static no.spk.panda.gdpr.validator.cli.Util.repositorynavn;
+import static no.spk.panda.gdpr.validator.cli.moduser.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
+import static no.spk.panda.gdpr.validator.cli.util.Util.repositorynavn;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.spk.panda.gdpr.validator.cli.FantIkkeGitRepositoryException;
+import no.spk.panda.gdpr.validator.cli.UtgangsInnstillinger;
 import no.spk.panda.gdpr.validator.cli.dtos.bitbucket.RepoesDto;
 import no.spk.panda.gdpr.validator.fnr.ValidatorParametere;
 
@@ -19,7 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-class GitRepoerFoedselsnummerSjekkerModus {
+public class GitRepoerFoedselsnummerSjekkerModus {
 
     private static final String bitbucketApiUrl = "http://git.spk.no/rest/api/1.0/projects/${prosjekt}/repos?limit=100";
 

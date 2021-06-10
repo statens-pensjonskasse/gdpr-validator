@@ -2,7 +2,8 @@ package no.spk.panda.gdpr.validator.cli;
 
 import static java.util.Objects.requireNonNull;
 
-class FantIkkeGitRepositoryException extends RuntimeException {
+public class FantIkkeGitRepositoryException extends RuntimeException {
+
     private static final long serialVersionUID = 0L;
     private final String feilmelding;
 
