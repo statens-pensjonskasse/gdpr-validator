@@ -6,6 +6,7 @@ import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperV
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -24,31 +25,26 @@ public class AnonymiserGrunnlagsdataModus {
 
     final static String MEDLEMSDATA_FILNAVN = "medlemsdata.csv";
 
-    final String fnrtype;
     final String bane;
     final List<String> filtyper;
     final UtgangsInnstillinger utgangsInnstillinger;
 
     private AnonymiserGrunnlagsdataModus(
-            final String fnrtype,
             final String bane,
             final List<String> filtyper,
             final UtgangsInnstillinger utgangsInnstillinger
     ) {
-        this.fnrtype = requireNonNull(fnrtype, "fnrtype er påkrevd, men var null");
         this.bane = requireNonNull(bane, "bane er påkrevd, men var null");
         this.filtyper = requireNonNull(filtyper, "filtyper er påkrevd, men var null");
         this.utgangsInnstillinger = requireNonNull(utgangsInnstillinger, "utgangsInnstillinger er påkrevd, men var null");
     }
 
     public static AnonymiserGrunnlagsdataModus anonymiserGrunnlagsdataModus(
-            final String fnrtype,
             final String bane,
             final List<String> filtyper,
             final UtgangsInnstillinger utgangsInnstillinger
     ) {
         return new AnonymiserGrunnlagsdataModus(
-                fnrtype,
                 bane,
                 filtyper,
                 utgangsInnstillinger
@@ -57,7 +53,6 @@ public class AnonymiserGrunnlagsdataModus {
 
     public void anonymiser() throws IOException {
         anonymiser(new File(bane));
-
     }
 
     private void anonymiser(final File fil) throws IOException {
@@ -74,36 +69,31 @@ public class AnonymiserGrunnlagsdataModus {
         }
     }
 
-    private void anonymiserMedlemsdata(final File fil) throws IOException {
+    private static void anonymiserMedlemsdata(final File fil) throws IOException {
         final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser = finnAlleFødselsnummereOgAnonymiser(fil);
-
-        System.out.println(instanser);
+        byttUtFødselsnummereIfil(fil, instanser);
     }
 
-    private Map<Foedselsnummer, AnonymisertFoedselsnummer> finnAlleFødselsnummereOgAnonymiser(final File fil) throws IOException {
+    private static Map<Foedselsnummer, AnonymisertFoedselsnummer> finnAlleFødselsnummereOgAnonymiser(final File fil) throws IOException {
         final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser = new HashMap<>();
 
-        try (final Stream<String> linesStream = Files.lines(fil.toPath())) {
-            linesStream.forEach(line -> {
-                System.out.println(line);
-
-                finnOgLeggTilFødselsnummerForLinje(instanser, line, parametereForKasperValidator());
-                finnOgLeggTilFødselsnummerForLinje(instanser, line, parametereForKasperMedSemikolonValidator());
+        try (final Stream<String> linjeStream = Files.lines(fil.toPath())) {
+            linjeStream.forEach(linje -> {
+                finnOgLeggTilFødselsnummerForLinje(instanser, linje, parametereForKasperValidator());
+                finnOgLeggTilFødselsnummerForLinje(instanser, linje, parametereForKasperMedSemikolonValidator());
             });
         }
 
         return instanser;
     }
 
-    private void finnOgLeggTilFødselsnummerForLinje(
+    private static void finnOgLeggTilFødselsnummerForLinje(
             final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser,
             final String line,
             final ValidatorParametere validatorParametere
     ) {
         final Matcher matcher = validatorParametere.mønster().matcher(line);
         while (matcher.find()) {
-            System.out.println(matcher.group());
-
             final Foedselsnummer fødselsnummer = Foedselsnummer.foedslesnummer(
                     matcher.group(),
                     validatorParametere
@@ -114,7 +104,37 @@ public class AnonymiserGrunnlagsdataModus {
                     validatorParametere
             );
 
-            instanser.put(fødselsnummer, anonymisertFødselsnummer);
+            instanser.putIfAbsent(fødselsnummer, anonymisertFødselsnummer);
+        }
+    }
+
+    private static void byttUtFødselsnummereIfil(
+            final File fil,
+            final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser
+    ) throws IOException {
+        final File newFile = new File(fil.getAbsolutePath() + ".txt");
+
+        try (final FileWriter writer = new FileWriter(newFile)) {
+            try (final Stream<String> linjeStream = Files.lines(fil.toPath())) {
+                linjeStream.forEach(linje -> {
+                            var modfisertLinje = new Object() { String linje; };
+                            modfisertLinje.linje = linje;
+                            instanser
+                                    .forEach((foedselsnummer, anonymisertFoedselsnummer) ->
+                                            modfisertLinje.linje = modfisertLinje.linje.replace(
+                                                    foedselsnummer.fødselsnummer(),
+                                                    anonymisertFoedselsnummer.fødselsnummer()
+                                            )
+                                    );
+
+                            try {
+                                writer.write(modfisertLinje.linje + "\n");
+                            } catch (final IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                );
+            }
         }
     }
 }

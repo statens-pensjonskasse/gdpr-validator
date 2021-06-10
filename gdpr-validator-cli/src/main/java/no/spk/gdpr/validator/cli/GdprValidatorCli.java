@@ -95,7 +95,7 @@ public class GdprValidatorCli implements Callable<Integer> {
                     return OK;
                 case "anonymiser_grunnlagsdata":
                     final UtgangsInnstillinger utgangsInnstillinger2 = utgangsInnstillinger(visOppsummering, visGyldighet, visNestenGyldighet, visFilbane);
-                    anonymiserGrunnlagsdata(fnrtype, bane, tilLowercase(filtyper), utgangsInnstillinger2);
+                    anonymiserGrunnlagsdata(bane, tilLowercase(filtyper), utgangsInnstillinger2);
                     return OK;
                 default:
                     System.out.format("Modusen \"%s\" er ukjent.\n", modus);
@@ -191,19 +191,18 @@ public class GdprValidatorCli implements Callable<Integer> {
     }
 
     private static void anonymiserGrunnlagsdata(
-            final String fnrtype,
             final String bane,
             final List<String> filtyper,
             final UtgangsInnstillinger utgangsInnstillinger
     ) throws IOException {
 
         if (filtyper.isEmpty()) {
-            System.out.format("Anonymiserer grunnlagsdata i %s med alle filtyper og fødsesnummertype %s...\n\n", bane, fnrtype);
+            System.out.format("Anonymiserer grunnlagsdata i %s med alle filtyper...\n\n", bane);
         } else {
-            System.out.format("Anonymiserer grunnlagsdata i %s med filtyper %s og fødselsnummertype %s...\n\n", bane, filtyper, fnrtype);
+            System.out.format("Anonymiserer grunnlagsdata i %s med filtyper %s...\n\n", bane, filtyper);
         }
 
-        AnonymiserGrunnlagsdataModus.anonymiserGrunnlagsdataModus(fnrtype, bane, filtyper, utgangsInnstillinger)
+        AnonymiserGrunnlagsdataModus.anonymiserGrunnlagsdataModus(bane, filtyper, utgangsInnstillinger)
                 .anonymiser();
     }
 }
