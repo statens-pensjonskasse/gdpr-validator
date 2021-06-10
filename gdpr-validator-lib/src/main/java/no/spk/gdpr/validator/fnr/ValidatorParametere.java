@@ -98,6 +98,14 @@ public class ValidatorParametere {
         return mønster;
     }
 
+    public int personnummerStart() {
+        return individnummerStart();
+    }
+
+    public int personnummerSlutt() {
+        return sjekksumSlutt;
+    }
+
     int datoStart() {
         return datoStart;
     }

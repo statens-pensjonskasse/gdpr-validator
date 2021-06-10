@@ -1,10 +1,10 @@
 package no.spk.gdpr.anonymisert.fnr;
 
 import static java.util.Objects.requireNonNull;
-
-import java.util.Random;
+import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 
 import no.spk.gdpr.validator.fnr.Foedselsnummer;
+import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
 public class AnonymisertFoedselsnummer {
 
@@ -14,16 +14,17 @@ public class AnonymisertFoedselsnummer {
         this.fødselsnummer = requireNonNull(fødselsnummer, "fødselsnummer er påkrevd, men var null");
     }
 
-    public static AnonymisertFoedselsnummer fraFoedselsnummer(final Foedselsnummer fødselsnummer) {
+    public static AnonymisertFoedselsnummer fraFoedselsnummer(
+            final Foedselsnummer fødselsnummer,
+            final ValidatorParametere validatorParametere
+    ) {
         requireNonNull(fødselsnummer, "fødselsnummer er påkrevd, men var null");
-        return fraFoedselsnummer(fødselsnummer, 984654981);
-    }
+        requireNonNull(validatorParametere, "validator-parametere er påkrevd, men var null");
 
-    public static AnonymisertFoedselsnummer fraFoedselsnummer(final Foedselsnummer fødselsnummer, final long seed) {
-        requireNonNull(fødselsnummer, "fødselsnummer er påkrevd, men var null");
+        final String fødselsnummerFørPersonnummer = fødselsnummer.fødselsnummer().substring(0, validatorParametere.personnummerStart());
+        final String anonymisertPersonnummer = anonymiserPersonnummer(fødselsnummer.personnummer());
 
-        final Random random = new Random(seed);
-        return new AnonymisertFoedselsnummer(fødselsnummer.fødselsnummer());
+        return new AnonymisertFoedselsnummer(fødselsnummerFørPersonnummer + anonymisertPersonnummer);
     }
 
     public String fødselsnummer() {
@@ -48,5 +49,9 @@ public class AnonymisertFoedselsnummer {
     @Override
     public int hashCode() {
         return fødselsnummer.hashCode();
+    }
+
+    private static String anonymiserPersonnummer(final String personnummer) {
+        return md5Hex(personnummer).substring(0, personnummer.length());
     }
 }
