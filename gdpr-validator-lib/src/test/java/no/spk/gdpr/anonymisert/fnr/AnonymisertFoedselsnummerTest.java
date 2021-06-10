@@ -6,6 +6,8 @@ import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperV
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.regex.Pattern;
+
 import no.spk.gdpr.validator.fnr.Foedselsnummer;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
@@ -99,5 +101,34 @@ public class AnonymisertFoedselsnummerTest {
                                 .fødselsnummer()
                                 .length()
                 );
+    }
+
+    @Test
+    public void skal_ikke_inneholde_noen_tall_i_personnummeret() {
+        final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
+        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        assertThat(
+                AnonymisertFoedselsnummer.fraFoedselsnummer(
+                        unanonymtFødselsnummer,
+                        validatorParametere
+                )
+                        .fødselsnummer()
+                        .split(";")[1]
+        )
+                .doesNotContainPattern(Pattern.compile("\\d"));
+    }
+
+    @Test
+    public void skal_ha_menneskevennlig_toString() {
+        final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
+        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        assertThat(
+                AnonymisertFoedselsnummer.fraFoedselsnummer(
+                        unanonymtFødselsnummer,
+                        validatorParametere
+                )
+                        .toString()
+        )
+                .isEqualTo("anonymisert fødselsnummer='33111111;@d!+\\'");
     }
 }

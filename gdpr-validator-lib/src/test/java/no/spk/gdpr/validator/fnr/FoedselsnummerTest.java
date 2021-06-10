@@ -153,4 +153,15 @@ public class FoedselsnummerTest {
                         "22222"
                 );
     }
+
+    @Test
+    public void skal_ha_menneskevennlig_toString() {
+        final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
+        final Foedselsnummer fødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        assertThat(
+                fødselsnummer
+                        .toString()
+        )
+                .isEqualTo("fødselsnummer='33111111;22222' er gyldig='false' er nesten gyldig='false'");
+    }
 }

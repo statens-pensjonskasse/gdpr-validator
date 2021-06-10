@@ -52,6 +52,16 @@ public class AnonymisertFoedselsnummer {
     }
 
     private static String anonymiserPersonnummer(final String personnummer) {
-        return md5Hex(personnummer).substring(0, personnummer.length());
+        return md5Hex(personnummer).substring(0, personnummer.length())
+                .replace('0', '?')
+                .replace('1', '+')
+                .replace('2', '!')
+                .replace('3', '@')
+                .replace('4', '#')
+                .replace('5', '$')
+                .replace('6', '/')
+                .replace('7', '\\')
+                .replace('8', '=')
+                .replace('9', '*');
     }
 }

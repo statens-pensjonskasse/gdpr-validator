@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
+import no.spk.gdpr.anonymisert.fnr.AnonymisertFoedselsnummer;
 import no.spk.gdpr.validator.cli.IkkeMedlemsdatafilException;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
 import no.spk.gdpr.validator.fnr.Foedselsnummer;
@@ -74,19 +75,46 @@ public class AnonymiserGrunnlagsdataModus {
     }
 
     private void anonymiserMedlemsdata(final File fil) throws IOException {
-        // Scan filen og finn alle fødselsnummere. Legg til i en HashMap.
-        final ValidatorParametere kasperParametere =  parametereForKasperValidator();
-        final ValidatorParametere kasperMedSemikolonParametere = parametereForKasperMedSemikolonValidator();
+        final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser = finnAlleFødselsnummereOgAnonymiser(fil);
 
-        final Map<Foedselsnummer, String> instanser = new HashMap<>();
-        try (Stream<String> linesStream = Files.lines(fil.toPath())) {
+        System.out.println(instanser);
+    }
+
+    private Map<Foedselsnummer, AnonymisertFoedselsnummer> finnAlleFødselsnummereOgAnonymiser(final File fil) throws IOException {
+        final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser = new HashMap<>();
+
+        try (final Stream<String> linesStream = Files.lines(fil.toPath())) {
             linesStream.forEach(line -> {
                 System.out.println(line);
-                final Matcher matcher = kasperParametere.mønster().matcher(line);
-                while (matcher.find()) {
-                    System.out.println(matcher.group());
-                }
+
+                finnOgLeggTilFødselsnummerForLinje(instanser, line, parametereForKasperValidator());
+                finnOgLeggTilFødselsnummerForLinje(instanser, line, parametereForKasperMedSemikolonValidator());
             });
+        }
+
+        return instanser;
+    }
+
+    private void finnOgLeggTilFødselsnummerForLinje(
+            final Map<Foedselsnummer, AnonymisertFoedselsnummer> instanser,
+            final String line,
+            final ValidatorParametere validatorParametere
+    ) {
+        final Matcher matcher = validatorParametere.mønster().matcher(line);
+        while (matcher.find()) {
+            System.out.println(matcher.group());
+
+            final Foedselsnummer fødselsnummer = Foedselsnummer.foedslesnummer(
+                    matcher.group(),
+                    validatorParametere
+            );
+
+            final AnonymisertFoedselsnummer anonymisertFødselsnummer = AnonymisertFoedselsnummer.fraFoedselsnummer(
+                    fødselsnummer,
+                    validatorParametere
+            );
+
+            instanser.put(fødselsnummer, anonymisertFødselsnummer);
         }
     }
 }
