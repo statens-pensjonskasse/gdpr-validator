@@ -41,7 +41,7 @@ public class ValidatorParametere {
         final int SJEKKSUM_SLUTT = 11;
         final int FØDSELSNUMMER_LENGDE = 11;
         final String FØDSELSDATO_MØNSTER = "ddMMyy";
-        final Pattern MØNSTER = Pattern.compile("(\\d{11})");
+        final Pattern MØNSTER = Pattern.compile("(?<fnr>\\d{11})");
 
         return new ValidatorParametere(
                 DATO_START, DATO_SLUTT,
@@ -62,7 +62,7 @@ public class ValidatorParametere {
         final int SJEKKSUM_SLUTT = 13;
         final int FØDSELSNUMMER_LENGDE = 13;
         final String FØDSELSDATO_MØNSTER = "yyyyMMdd";
-        final Pattern MØNSTER = Pattern.compile("(\\d{13})");
+        final Pattern MØNSTER = Pattern.compile("(?<fnr>\\d{13})");
 
         return new ValidatorParametere(
                 DATO_START, DATO_SLUTT,
@@ -83,7 +83,7 @@ public class ValidatorParametere {
         final int SJEKKSUM_SLUTT = 14;
         final int FØDSELSNUMMER_LENGDE = 14;
         final String FØDSELSDATO_MØNSTER = "yyyyMMdd";
-        final Pattern MØNSTER = Pattern.compile("(\\d{8};\\d{5})");
+        final Pattern MØNSTER = Pattern.compile("(^|;)(?<fnr>\\d{8};\\d{5})(;|$)");
 
         return new ValidatorParametere(
                 DATO_START, DATO_SLUTT,
