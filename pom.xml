@@ -9,9 +9,9 @@
         <version>122</version>
     </parent>
 
-    <groupId>no.spk.panda.gdpr.validator</groupId>
-    <artifactId>panda-gdpr-validator-pom</artifactId>
-    <name>panda-gdpr-validator-pom</name>
+    <groupId>no.spk.gdpr.validator</groupId>
+    <artifactId>gdpr-validator-pom</artifactId>
+    <name>gdpr-validator-pom</name>
     <version>0.0.3-SNAPSHOT</version>
 
     <description>
@@ -19,8 +19,8 @@
     </description>
 
     <modules>
-        <module>panda-gdpr-validator-cli</module>
-        <module>panda-gdpr-validator-lib</module>
+        <module>gdpr-validator-cli</module>
+        <module>gdpr-validator-lib</module>
     </modules>
 
     <properties>
