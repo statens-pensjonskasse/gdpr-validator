@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import no.spk.gdpr.anonymisert.fnr.AnonymisertFoedselsnummer;
 import no.spk.gdpr.validator.cli.IkkeMedlemsdatafilException;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
+import no.spk.gdpr.validator.cli.util.Tuple;
 import no.spk.gdpr.validator.fnr.Foedselsnummer;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
@@ -65,30 +67,40 @@ public class AnonymiserGrunnlagsdataModus {
                 throw new IkkeMedlemsdatafilException(fil.getName());
             }
         } else if (fil.isDirectory()) {
-            anonymiser(new File(MEDLEMSDATA_FILNAVN));
+            anonymiser(new File(fil.getAbsolutePath() + '/' + MEDLEMSDATA_FILNAVN));
         }
     }
 
     private static void anonymiserMedlemsdata(final File fil) throws IOException {
-        final Map<Foedselsnummer, AnonymisertFoedselsnummer> fødselsnummere = finnAlleFødselsnummereOgAnonymiser(fil);
+        final Tuple<Map<Foedselsnummer, AnonymisertFoedselsnummer>, Map<Integer, List<Foedselsnummer>>> fødselsnummere =
+                finnAlleFødselsnummereOgAnonymiser(fil);
         byttUtFødselsnummereIfil(fil, fødselsnummere);
     }
 
-    private static Map<Foedselsnummer, AnonymisertFoedselsnummer> finnAlleFødselsnummereOgAnonymiser(final File fil) throws IOException {
+    private static Tuple<Map<Foedselsnummer, AnonymisertFoedselsnummer>, Map<Integer, List<Foedselsnummer>>> finnAlleFødselsnummereOgAnonymiser(
+            final File fil
+    ) throws IOException {
         final Map<Foedselsnummer, AnonymisertFoedselsnummer> fødselsnummere = new HashMap<>();
+        final Map<Integer, List<Foedselsnummer>> fødselsnummerPåLinje = new HashMap<>();
 
         try (final Stream<String> linjeStream = Files.lines(fil.toPath())) {
+            var linjeNummer = new Object() {
+                int val = 0;
+            };
             linjeStream.forEach(linje -> {
-                finnOgLeggTilFødselsnummerForLinje(fødselsnummere, linje, parametereForKasperValidator());
-                finnOgLeggTilFødselsnummerForLinje(fødselsnummere, linje, parametereForKasperMedSemikolonValidator());
+                finnOgLeggTilFødselsnummerForLinje(fødselsnummere, fødselsnummerPåLinje, linjeNummer.val, linje, parametereForKasperValidator());
+                finnOgLeggTilFødselsnummerForLinje(fødselsnummere, fødselsnummerPåLinje, linjeNummer.val, linje, parametereForKasperMedSemikolonValidator());
+                linjeNummer.val++;
             });
         }
 
-        return fødselsnummere;
+        return new Tuple<>(fødselsnummere, fødselsnummerPåLinje);
     }
 
     private static void finnOgLeggTilFødselsnummerForLinje(
             final Map<Foedselsnummer, AnonymisertFoedselsnummer> fødselsnummere,
+            final Map<Integer, List<Foedselsnummer>> fødselsnummerPåLinje,
+            final int linjeNummer,
             final String line,
             final ValidatorParametere validatorParametere
     ) {
@@ -106,34 +118,49 @@ public class AnonymiserGrunnlagsdataModus {
 
             if (fødselsnummer.erGyldig() || fødselsnummer.erNestenGyldig()) {
                 fødselsnummere.putIfAbsent(fødselsnummer, anonymisertFødselsnummer);
+
+                final List<Foedselsnummer> fødselsnummerePåLinjen;
+                if (fødselsnummerPåLinje.containsKey(linjeNummer)) {
+                    fødselsnummerePåLinjen = fødselsnummerPåLinje.get(linjeNummer);
+                } else {
+                    fødselsnummerePåLinjen = new ArrayList<>();
+                }
+                fødselsnummerePåLinjen.add(fødselsnummer);
+                fødselsnummerPåLinje.put(linjeNummer, fødselsnummerePåLinjen);
             }
         }
     }
 
     private static void byttUtFødselsnummereIfil(
             final File fil,
-            final Map<Foedselsnummer, AnonymisertFoedselsnummer> fødselsnummere
+            final Tuple<Map<Foedselsnummer, AnonymisertFoedselsnummer>, Map<Integer, List<Foedselsnummer>>> fødselsnummere
     ) throws IOException {
         final File newFile = new File(fil.getAbsolutePath() + ".txt");
 
+
         try (final FileWriter writer = new FileWriter(newFile)) {
             try (final Stream<String> linjeStream = Files.lines(fil.toPath())) {
+                var linjeNummer = new Object() { int val; };
                 linjeStream.forEach(linje -> {
                             var modfisertLinje = new Object() { String linje; };
                             modfisertLinje.linje = linje;
-                            fødselsnummere
-                                    .forEach((foedselsnummer, anonymisertFoedselsnummer) ->
-                                            modfisertLinje.linje = modfisertLinje.linje.replace(
-                                                    foedselsnummer.fødselsnummer(),
-                                                    anonymisertFoedselsnummer.fødselsnummer()
-                                            )
-                                    );
+                            if (fødselsnummere.andre().get(linjeNummer.val) != null) {
+                                fødselsnummere.andre().get(linjeNummer.val)
+                                        .forEach(foedselsnummer ->
+                                                modfisertLinje.linje = modfisertLinje.linje.replace(
+                                                        foedselsnummer.fødselsnummer(),
+                                                        fødselsnummere.første().get(foedselsnummer).fødselsnummer()
+                                                )
+                                        );
 
-                            try {
-                                writer.write(modfisertLinje.linje + "\n");
-                            } catch (final IOException e) {
-                                e.printStackTrace();
+                                try {
+                                    writer.write(modfisertLinje.linje + "\n");
+                                } catch (final IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
+
+                            linjeNummer.val++;
                         }
                 );
             }
