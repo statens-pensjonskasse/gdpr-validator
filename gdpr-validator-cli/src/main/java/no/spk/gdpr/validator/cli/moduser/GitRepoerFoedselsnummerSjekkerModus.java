@@ -22,7 +22,7 @@ import okhttp3.Response;
 
 public class GitRepoerFoedselsnummerSjekkerModus {
 
-    private static final String bitbucketApiUrl = "http://git.spk.no/rest/api/1.0/projects/${prosjekt}/repos?limit=100";
+    private static final String bitbucketApiUrl = "https://git.spk.no/rest/api/1.0/projects/${prosjekt}/repos?limit=100";
 
     private final List<String> filtyper;
     private final ValidatorParametere validatorParametere;

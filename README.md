@@ -49,7 +49,7 @@ java -jar gdpr-validator-cli-*-jar-with-dependencies.jar \
   -f kasper \
   -t feature -t md -t java -t csv -t xml -t sh -t txt -t sql -t r -t js -t ts -t html -t css \
   --visOppsummering --visGyldighet --visOppsummering --visFilbane \
-  http://git.spk.no/scm/pnd/panda-fakturering-aggregering.git > fnr.txt
+  https://git.spk.no/scm/pnd/panda-fakturering-aggregering.git > fnr.txt
 ```
 
 Eksempel alle Git-repositories i et prosjekt med kasper-fødselsnummere (separert med semikolon mellom dato og resten):
