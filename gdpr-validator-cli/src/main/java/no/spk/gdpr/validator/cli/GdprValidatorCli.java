@@ -1,9 +1,11 @@
 package no.spk.gdpr.validator.cli;
 
-import static no.spk.gdpr.validator.cli.moduser.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
-import static no.spk.gdpr.validator.cli.moduser.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
-import static no.spk.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
 import static no.spk.gdpr.validator.cli.UtgangsInnstillinger.utgangsInnstillinger;
+import static no.spk.gdpr.validator.cli.moduser.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
+import static no.spk.gdpr.validator.cli.moduser.GitRepoHeleHistorienFoedselsnummerSjekkerModus.gitRepoHeleHistorienFoedselsnummerSjekkerModus;
+import static no.spk.gdpr.validator.cli.moduser.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
+import static no.spk.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerHeleHistorienModus.lokalFoedselsnummerSjekkerHeleHistorienModus;
+import static no.spk.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
 import static no.spk.gdpr.validator.cli.util.Util.repositorynavn;
 import static no.spk.gdpr.validator.cli.util.Util.tilLowercase;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
@@ -44,7 +46,7 @@ public class GdprValidatorCli implements Callable<Integer> {
 
     @Option(names = {"-m", "--modus"},
             required = true,
-            description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer, anonymiser_grunnlagsdata)."
+            description = "Spesifiser ønsket modus (tilgjengelig: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer, fødselsnummer_ett_repo_hele_historien, anonymiser_grunnlagsdata)."
     )
     private String modus;
 
@@ -90,6 +92,7 @@ public class GdprValidatorCli implements Callable<Integer> {
                 case "fødselsnummer":
                 case "fødselsnummer_ett_repo":
                 case "fødselsnummer_alle_repoer":
+                case "fødselsnummer_ett_repo_hele_historien":
                     final UtgangsInnstillinger utgangsInnstillinger = utgangsInnstillinger(visOppsummering, visGyldighet, visNestenGyldighet, visFilbane);
                     foedselsnummerSjekk(modus, fnrtype, bane, tilLowercase(filtyper), utgangsInnstillinger);
                     return OK;
@@ -184,6 +187,16 @@ public class GdprValidatorCli implements Callable<Integer> {
 
                 gitRepoerFoedselsnummerSjekkerModus(filtyper, parametere, utgangsInnstillinger)
                         .sjekkMangeRepoer(bane);
+                break;
+            case "fødselsnummer_ett_repo_hele_historien":
+                if (filtyper.isEmpty()) {
+                    System.out.format("Leter etter fødselsnummere i Git-prosjektet %s i hele Git-loggen med alle filtyper og validerer dem...\n\n", bane);
+                } else {
+                    System.out.format("Leter etter fødselsnummere i Git-prosjektet %s i hele Git-loggen med filtyper %s og validerer dem...\n\n", bane, filtyper);
+                }
+
+                gitRepoHeleHistorienFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerHeleHistorienModus(repositorynavn(bane), filtyper, parametere, utgangsInnstillinger))
+                        .sjekkEttRepo(bane);
                 break;
             default:
                 throw new UkjentInngangsParameterException(String.format("Modusen \"%s\" er ukjent.\n", modus));

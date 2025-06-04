@@ -16,12 +16,12 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import no.spk.gdpr.validator.cli.util.Util;
 import no.spk.gdpr.validator.cli.Resultat;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
+import no.spk.gdpr.validator.cli.util.Util;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
-public class LokalFoedselsnummerSjekkerModus {
+public class LokalFoedselsnummerSjekkerHeleHistorienModus {
 
     private final Pattern fødselsnummerRegex;
     private final ValidatorParametere validatorParametere;
@@ -32,14 +32,14 @@ public class LokalFoedselsnummerSjekkerModus {
     private final boolean skalFiltrerePåFiletternavn;
     private final List<Resultat> resultater;
 
-    private LokalFoedselsnummerSjekkerModus(
+    private LokalFoedselsnummerSjekkerHeleHistorienModus(
             final String bane,
             final List<String> filtyper
     ) {
         this(bane, filtyper, parametereForOrdinærValidator(), visAlleUtgangsvariabler());
     }
 
-    private LokalFoedselsnummerSjekkerModus(
+    private LokalFoedselsnummerSjekkerHeleHistorienModus(
             final String bane,
             final List<String> filtyper,
             final ValidatorParametere validatorParametere,
@@ -55,20 +55,20 @@ public class LokalFoedselsnummerSjekkerModus {
         resultater = new ArrayList<>();
     }
 
-    public static LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus(
+    public static LokalFoedselsnummerSjekkerHeleHistorienModus lokalFoedselsnummerSjekkerHeleHistorienModus(
             final String bane,
             final List<String> filtyper
     ) {
-        return new LokalFoedselsnummerSjekkerModus(bane, filtyper);
+        return new LokalFoedselsnummerSjekkerHeleHistorienModus(bane, filtyper);
     }
 
-    public static LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus(
+    public static LokalFoedselsnummerSjekkerHeleHistorienModus lokalFoedselsnummerSjekkerHeleHistorienModus(
             final String bane,
             final List<String> filtyper,
             final ValidatorParametere validatorParametere,
             final UtgangsInnstillinger utgangsInnstillinger
     ) {
-        return new LokalFoedselsnummerSjekkerModus(bane, filtyper, validatorParametere, utgangsInnstillinger);
+        return new LokalFoedselsnummerSjekkerHeleHistorienModus(bane, filtyper, validatorParametere, utgangsInnstillinger);
     }
 
     public void kjør() throws FileNotFoundException {
