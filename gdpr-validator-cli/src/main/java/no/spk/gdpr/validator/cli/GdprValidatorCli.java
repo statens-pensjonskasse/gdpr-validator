@@ -195,7 +195,11 @@ public class GdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-prosjektet %s i hele Git-loggen med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoHeleHistorienFoedselsnummerSjekkerModus(lokalFoedselsnummerSjekkerHeleHistorienModus(repositorynavn(bane), filtyper, parametere, utgangsInnstillinger))
+                gitRepoHeleHistorienFoedselsnummerSjekkerModus(
+                        lokalFoedselsnummerSjekkerHeleHistorienModus(
+                                lokalFoedselsnummerSjekkerModus(repositorynavn(bane), filtyper, parametere, utgangsInnstillinger)
+                        )
+                )
                         .sjekkEttRepo(bane);
                 break;
             default:

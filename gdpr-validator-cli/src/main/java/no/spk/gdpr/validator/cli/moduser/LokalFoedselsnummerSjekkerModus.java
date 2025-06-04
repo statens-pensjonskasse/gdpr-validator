@@ -95,7 +95,7 @@ public class LokalFoedselsnummerSjekkerModus {
     }
 
     private void sjekkEnkeltfil(final File fil) throws FileNotFoundException {
-        if (skalFiltrerePåFiletternavn && !filtyper.contains(Util.filetternavn(fil).toLowerCase(Locale.ROOT))) {
+        if (skalFiltrerePåFiletternavn && !filetternavnetErRelevant(fil)) {
             return;
         }
 
@@ -108,5 +108,9 @@ public class LokalFoedselsnummerSjekkerModus {
                         )
                         .collect(Collectors.toUnmodifiableList())
                 );
+    }
+
+    private boolean filetternavnetErRelevant(File fil) {
+        return filtyper.contains(Util.filetternavn(fil).toLowerCase(Locale.ROOT));
     }
 }

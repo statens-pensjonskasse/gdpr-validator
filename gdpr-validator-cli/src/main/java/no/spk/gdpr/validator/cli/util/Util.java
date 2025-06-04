@@ -37,6 +37,7 @@ public class Util {
         return lst.stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toUnmodifiableList());
     }
 
+    @SuppressWarnings("HttpUrlsUsage")
     public static boolean erGitUrl(final String bane) {
         return filetternavn(bane).equals("git") &&
                 (bane.contains("http://") || bane.contains("https://") || bane.contains("git://") || bane.contains("ssh://"));
