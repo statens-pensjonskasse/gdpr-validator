@@ -84,6 +84,7 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
         try (final Git git = new Git(repo)) {
             resultater.addAll(
                     alleCommits(git)
+                            .parallel()
                             .filter(commit -> commit.getParentCount() > 0)
                             .flatMap(commit -> finnAlleDifferICommitten(commit, repo, git))
                             .flatMap(commitOgDiff -> finnAlleFødselsnummereIDiffen(commitOgDiff, repo))
@@ -106,6 +107,7 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
                     .setNewTree(prepareTreeParser(repo, commit.getId().getName()))
                     .call()
                     .stream()
+                    .parallel()
                     .map(diff -> new CommitOgDiff(commit, diff));
         } catch (final GitAPIException e) {
             throw new RuntimeException(e);
@@ -132,7 +134,8 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
                                             foedslesnummer(potensieltFødselsnummer, validatorParametere),
                                             lagFilnavn(commitOgDiff.commit, commitOgDiff.diff)
                                     )
-                            );
+                            )
+                            .parallel();
                 } else {
                     return Stream.empty();
                 }
