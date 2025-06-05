@@ -68,7 +68,8 @@ Parametere er:
 - **m: modus**. Moduser: fødselsnummer, fødselsnummer_ett_repo, fødselsnummer_alle_repoer.
     * Modusen fødselsnummer sjekker det lokale filsystemet.
     * Modusen fødselsnummer_ett_repo sjekker et Git-repository. Repositoryet blir lastet ned.
-    * Modusen fødselsnummer_alle_repoer sjekket alle Git-repositoryer i ett prosjekt (f.eks. PND eller PER). Alle repositoryene blir lastet ned.
+    * Modusen fødselsnummer_alle_repoer sjekker alle Git-repositoryer i ett prosjekt (f.eks. PND eller PER). Alle repositoryene blir lastet ned.
+    * Modusen fødselsnummer_ett_repo_hele_historien sjekker hele Git-loggen til et lokalt prosjekt.
 - **f: fnrtype**. Fødselsnummertype. Enten ordinær (ddMMyyiiiss), kasper (yyyyMMddiiiss) eller kasper_med_semikolon (yyyyMMdd;iiiss).
 - **t: filtype**. En liste av filtyper å sjekke data i. Angi som liste på denne måten: `-t filtype1 -t filtype2`.
 - **o: visOppsummering**. Vis oppsummering av resultatene.
