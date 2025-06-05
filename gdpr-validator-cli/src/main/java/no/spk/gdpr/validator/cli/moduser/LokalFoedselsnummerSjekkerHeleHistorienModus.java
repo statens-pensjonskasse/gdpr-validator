@@ -1,17 +1,21 @@
 package no.spk.gdpr.validator.cli.moduser;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 import static no.spk.gdpr.validator.cli.Resultat.resultat;
 import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import no.spk.gdpr.validator.cli.Resultat;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
@@ -78,38 +82,63 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
                 .build();
 
         try (final Git git = new Git(repo)) {
-            for (final RevCommit commit : git.log().all().call()) {
-                if (commit.getParentCount() == 0) { // På første commit
-                    continue;
-                }
+            resultater.addAll(
+                    alleCommits(git)
+                            .filter(commit -> commit.getParentCount() > 0)
+                            .flatMap(commit -> finnAlleDifferICommitten(commit, repo, git))
+                            .flatMap(commitOgDiff -> finnAlleFødselsnummereIDiffen(commitOgDiff, repo))
+                            .toList()
+            );
+        }
+    }
 
-                final AbstractTreeIterator oldTreeParser = prepareTreeParser(repo, commit.getParent(0).getName());
-                final AbstractTreeIterator newTreeParser = prepareTreeParser(repo, commit.getId().getName());
+    private static Stream<RevCommit> alleCommits(final Git git) throws GitAPIException, IOException {
+        return stream(
+                git.log().all().call().spliterator(),
+                true
+        );
+    }
 
-                for (final DiffEntry entry : git.diff().setOldTree(oldTreeParser).setNewTree(newTreeParser).call()) {
-                    final ByteArrayOutputStream bs = new ByteArrayOutputStream();
-                    try (final DiffFormatter formatter = new DiffFormatter(bs)) {
-                        formatter.setRepository(repo);
-                        formatter.format(entry);
-                        final String somTekst = bs.toString();
+    private static Stream<CommitOgDiff> finnAlleDifferICommitten(final RevCommit commit, final Repository repo, final Git git) {
+        try {
+            return git.diff()
+                    .setOldTree(prepareTreeParser(repo, commit.getParent(0).getName()))
+                    .setNewTree(prepareTreeParser(repo, commit.getId().getName()))
+                    .call()
+                    .stream()
+                    .map(diff -> new CommitOgDiff(commit, diff));
+        } catch (final GitAPIException e) {
+            throw new RuntimeException(e);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
-                        final Matcher fødselsnummerMatcher = fødselsnummerRegex.matcher(somTekst);
-                        if (fødselsnummerMatcher.find()) {
-                            resultater.addAll(
-                                    fødselsnummerMatcher.results().map(MatchResult::group)
-                                            .distinct()
-                                            .map(potensieltFødselsnummer ->
-                                                    resultat(
-                                                            foedslesnummer(potensieltFødselsnummer, validatorParametere),
-                                                            lagFilnavn(commit, entry)
-                                                    )
-                                            )
-                                            .toList()
+    private Stream<Resultat> finnAlleFødselsnummereIDiffen(final CommitOgDiff commitOgDiff, final Repository repo) {
+        try {
+            final ByteArrayOutputStream bs = new ByteArrayOutputStream();
+            try (final DiffFormatter formatter = new DiffFormatter(bs)) {
+                formatter.setRepository(repo);
+                formatter.format(commitOgDiff.diff);
+
+                final Matcher fødselsnummerMatcher = fødselsnummerRegex.matcher(bs.toString(UTF_8));
+                if (fødselsnummerMatcher.find()) {
+                    return fødselsnummerMatcher
+                            .results()
+                            .map(MatchResult::group)
+                            .distinct()
+                            .map(potensieltFødselsnummer ->
+                                    resultat(
+                                            foedslesnummer(potensieltFødselsnummer, validatorParametere),
+                                            lagFilnavn(commitOgDiff.commit, commitOgDiff.diff)
+                                    )
                             );
-                        }
-                    }
+                } else {
+                    return Stream.empty();
                 }
             }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -139,5 +168,8 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
 
             return treeParser;
         }
+    }
+
+    private record CommitOgDiff(RevCommit commit, DiffEntry diff) {
     }
 }
