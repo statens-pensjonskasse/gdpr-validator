@@ -4,7 +4,7 @@
     <parent>
         <groupId>no.spk.gdpr.validator</groupId>
         <artifactId>gdpr-validator-pom</artifactId>
-        <version>0.0.4</version>
+        <version>0.0.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>gdpr-validator-lib</artifactId>
