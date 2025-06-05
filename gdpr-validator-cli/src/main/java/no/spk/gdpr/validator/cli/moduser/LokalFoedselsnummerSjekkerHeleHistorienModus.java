@@ -100,11 +100,8 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
                                             .distinct()
                                             .map(potensieltFødselsnummer ->
                                                     resultat(
-                                                            foedslesnummer(
-                                                                    potensieltFødselsnummer,
-                                                                    validatorParametere
-                                                            ),
-                                                            entry.getNewPath() + " (" + commit.getId().getName() + ")"
+                                                            foedslesnummer(potensieltFødselsnummer, validatorParametere),
+                                                            lagFilnavn(commit, entry)
                                                     )
                                             )
                                             .toList()
@@ -113,6 +110,18 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
                     }
                 }
             }
+        }
+    }
+
+    private static String lagFilnavn(final RevCommit commit, final DiffEntry entry) {
+        if (entry.getOldPath().equals(entry.getNewPath())) {
+            return entry.getNewPath() + " (" + commit.getId().getName() + ")";
+        } else if (entry.getOldPath().equals("/dev/null")) {
+            return entry.getNewPath() + " (" + commit.getId().getName() + ")";
+        } else if (entry.getNewPath().equals("/dev/null")) {
+            return entry.getOldPath() + " (" + commit.getId().getName() + ")";
+        } else {
+            return entry.getOldPath() + " --> " + entry.getNewPath() + " (" + commit.getId().getName() + ")";
         }
     }
 
