@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import no.spk.gdpr.validator.fnr.Foedselsnummer;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AnonymisertFoedselsnummerTest {
 

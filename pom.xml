@@ -41,7 +41,12 @@
 
         <slf4j.version>2.0.17</slf4j.version>
         <picocli.version>4.7.7</picocli.version>
-        <graalvm.version>21.2.0</graalvm.version>
+        <commons-io.version>2.19.0</commons-io.version>
+        <commonmark.version>0.24.0</commonmark.version>
+        <jgit.version>7.2.1.202505142326-r</jgit.version>
+
+        <junit-5.version>5.13.0</junit-5.version>
+        <assertj.version>3.27.3</assertj.version>
 
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
@@ -73,20 +78,16 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>graal-sdk</artifactId>
-                <version>${graalvm.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.27.3</version>
+                <version>${assertj.version}</version>
             </dependency>
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.2</version>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-5.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
@@ -96,17 +97,17 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.19.0</version>
+                <version>${commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.commonmark</groupId>
                 <artifactId>commonmark</artifactId>
-                <version>0.24.0</version>
+                <version>${commonmark.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jgit</groupId>
                 <artifactId>org.eclipse.jgit</artifactId>
-                <version>7.2.1.202505142326-r</version>
+                <version>${jgit.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -167,7 +168,7 @@
                     <version>${maven-javadoc-plugin.version}</version>
                     <configuration>
                         <quiet>true</quiet>
-                        <source>1.8</source>
+                        <source>21</source>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -227,13 +228,6 @@
                     <target>21</target>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>info.picocli</groupId>
-                            <artifactId>picocli-codegen</artifactId>
-                            <version>${picocli.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
                     </compilerArgs>
@@ -253,8 +247,8 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -308,13 +302,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*IT.class</include>
-                        <include>**/*AT.class</include>
-                    </includes>
-                    <groups>native-image</groups>
-                </configuration>
             </plugin>
         </plugins>
     </build>
