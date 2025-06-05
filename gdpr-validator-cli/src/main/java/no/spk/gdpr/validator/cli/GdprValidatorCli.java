@@ -2,7 +2,6 @@ package no.spk.gdpr.validator.cli;
 
 import static no.spk.gdpr.validator.cli.UtgangsInnstillinger.utgangsInnstillinger;
 import static no.spk.gdpr.validator.cli.moduser.GitRepoFoedselsnummerSjekkerModus.gitRepoFoedselsnummerSjekkerModus;
-import static no.spk.gdpr.validator.cli.moduser.GitRepoHeleHistorienFoedselsnummerSjekkerModus.gitRepoHeleHistorienFoedselsnummerSjekkerModus;
 import static no.spk.gdpr.validator.cli.moduser.GitRepoerFoedselsnummerSjekkerModus.gitRepoerFoedselsnummerSjekkerModus;
 import static no.spk.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerHeleHistorienModus.lokalFoedselsnummerSjekkerHeleHistorienModus;
 import static no.spk.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
@@ -24,6 +23,7 @@ import java.util.concurrent.Callable;
 import no.spk.gdpr.validator.cli.moduser.AnonymiserGrunnlagsdataModus;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import picocli.CommandLine;
 
 @SuppressWarnings("unused")
@@ -128,23 +128,12 @@ public class GdprValidatorCli implements Callable<Integer> {
     }
 
     private static ValidatorParametere velgParametereFraCmdLineArgs(final String fnrtype) {
-        final ValidatorParametere parametere;
-
-        switch (fnrtype) {
-            case "ordinær":
-                parametere = parametereForOrdinærValidator();
-                break;
-            case "kasper":
-                parametere = parametereForKasperValidator();
-                break;
-            case "kasper_med_semikolon":
-                parametere = parametereForKasperMedSemikolonValidator();
-                break;
-            default:
-                throw new UkjentInngangsParameterException(String.format("Fødselsnummertypen \"%s\" er ukjent.\n", fnrtype));
-        }
-
-        return parametere;
+        return switch (fnrtype) {
+            case "ordinær" -> parametereForOrdinærValidator();
+            case "kasper" -> parametereForKasperValidator();
+            case "kasper_med_semikolon" -> parametereForKasperMedSemikolonValidator();
+            default -> throw new UkjentInngangsParameterException(String.format("Fødselsnummertypen \"%s\" er ukjent.\n", fnrtype));
+        };
     }
 
     private static void foedselsnummerSjekk(
@@ -153,7 +142,7 @@ public class GdprValidatorCli implements Callable<Integer> {
             final String bane,
             final List<String> filtyper,
             final UtgangsInnstillinger utgangsInnstillinger
-    ) throws IOException {
+    ) throws IOException, GitAPIException {
 
         final ValidatorParametere parametere = velgParametereFraCmdLineArgs(fnrtype);
 
@@ -195,12 +184,8 @@ public class GdprValidatorCli implements Callable<Integer> {
                     System.out.format("Leter etter fødselsnummere i Git-prosjektet %s i hele Git-loggen med filtyper %s og validerer dem...\n\n", bane, filtyper);
                 }
 
-                gitRepoHeleHistorienFoedselsnummerSjekkerModus(
-                        lokalFoedselsnummerSjekkerHeleHistorienModus(
-                                lokalFoedselsnummerSjekkerModus(repositorynavn(bane), filtyper, parametere, utgangsInnstillinger)
-                        )
-                )
-                        .sjekkEttRepo(bane);
+                lokalFoedselsnummerSjekkerHeleHistorienModus(bane, parametere, utgangsInnstillinger)
+                        .kjør();
                 break;
             default:
                 throw new UkjentInngangsParameterException(String.format("Modusen \"%s\" er ukjent.\n", modus));

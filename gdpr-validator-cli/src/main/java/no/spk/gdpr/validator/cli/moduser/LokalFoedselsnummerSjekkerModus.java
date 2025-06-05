@@ -106,11 +106,11 @@ public class LokalFoedselsnummerSjekkerModus {
                         .map(potensieltFødselsnummer ->
                                 resultat(foedslesnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath())
                         )
-                        .collect(Collectors.toUnmodifiableList())
+                        .toList()
                 );
     }
 
-    private boolean filetternavnetErRelevant(File fil) {
+    private boolean filetternavnetErRelevant(final File fil) {
         return filtyper.contains(Util.filetternavn(fil).toLowerCase(Locale.ROOT));
     }
 }

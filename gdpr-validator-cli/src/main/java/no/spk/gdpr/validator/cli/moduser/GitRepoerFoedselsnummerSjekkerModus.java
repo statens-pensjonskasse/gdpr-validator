@@ -1,12 +1,10 @@
 package no.spk.gdpr.validator.cli.moduser;
 
 import static java.util.Objects.requireNonNull;
-import static no.spk.gdpr.validator.cli.moduser.LokalFoedselsnummerSjekkerModus.lokalFoedselsnummerSjekkerModus;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.spk.gdpr.validator.cli.FantIkkeGitRepositoryException;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
@@ -71,38 +69,23 @@ public class GitRepoerFoedselsnummerSjekkerModus {
                     .values
                     .stream()
                     .map(v -> GitRepo.gitRepo(
-                            v.name,
-                            v.links.clone
-                                    .stream()
-                                    .filter(l -> l.name.equals("http"))
-                                    .findFirst()
-                                    .orElseThrow(() -> new FantIkkeGitRepositoryException("Fant ikke http-repo"))
-                                    .href
+                                    v.name,
+                                    v.links.clone
+                                            .stream()
+                                            .filter(l -> l.name.equals("http"))
+                                            .findFirst()
+                                            .orElseThrow(() -> new FantIkkeGitRepositoryException("Fant ikke http-repo"))
+                                            .href
                             )
                     )
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
     }
 
-    private static class GitRepo {
-        private final String navn;
-        private final String url;
-
-        private GitRepo(final String navn, final String url) {
-            this.navn = navn;
-            this.url = url;
-        }
+    private record GitRepo(String navn, String url) {
 
         public static GitRepo gitRepo(final String navn, final String url) {
             return new GitRepo(navn, url);
-        }
-
-        public String navn() {
-            return navn;
-        }
-
-        public String url() {
-            return url;
         }
 
         @Override
