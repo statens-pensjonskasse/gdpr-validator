@@ -10,7 +10,7 @@
     <groupId>no.spk.gdpr.validator</groupId>
 
     <artifactId>gdpr-validator-pom</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>gdpr-validator-pom</name>
 
