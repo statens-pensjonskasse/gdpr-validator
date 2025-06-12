@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -123,22 +122,19 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
                 formatter.setRepository(repo);
                 formatter.format(commitOgDiff.diff);
 
+                final List<Resultat> resultater = new ArrayList<>();
                 final Matcher fødselsnummerMatcher = fødselsnummerRegex.matcher(bs.toString(UTF_8));
-                if (fødselsnummerMatcher.find()) {
-                    return fødselsnummerMatcher
-                            .results()
-                            .map(MatchResult::group)
-                            .distinct()
-                            .map(potensieltFødselsnummer ->
-                                    resultat(
-                                            foedslesnummer(potensieltFødselsnummer, validatorParametere),
-                                            lagFilnavn(commitOgDiff.commit, commitOgDiff.diff)
-                                    )
+
+                while (fødselsnummerMatcher.find()) {
+                    resultater.add(
+                            resultat(
+                                    foedslesnummer(fødselsnummerMatcher.group("fnr"), validatorParametere),
+                                    lagFilnavn(commitOgDiff.commit, commitOgDiff.diff)
                             )
-                            .parallel();
-                } else {
-                    return Stream.empty();
+                    );
                 }
+
+                return resultater.stream();
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
