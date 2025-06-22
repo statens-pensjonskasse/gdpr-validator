@@ -10,6 +10,10 @@ public class Tuple<T, U> {
         this.andre = andre;
     }
 
+    public static <T, U> Tuple<T, U> tuple(T første, U andre) {
+        return new Tuple<>(første, andre);
+    }
+
     public T første() {
         return første;
     }

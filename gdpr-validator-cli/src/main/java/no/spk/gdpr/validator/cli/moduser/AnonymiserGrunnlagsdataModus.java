@@ -106,7 +106,7 @@ public class AnonymiserGrunnlagsdataModus {
     ) {
         final Matcher matcher = validatorParametere.mønster().matcher(line);
         while (matcher.find()) {
-            final Foedselsnummer fødselsnummer = Foedselsnummer.foedslesnummer(
+            final Foedselsnummer fødselsnummer = Foedselsnummer.foedselsnummer(
                     matcher.group("fnr"),
                     validatorParametere
             );

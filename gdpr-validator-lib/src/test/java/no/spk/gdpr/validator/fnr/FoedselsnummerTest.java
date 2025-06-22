@@ -1,6 +1,6 @@
 package no.spk.gdpr.validator.fnr;
 
-import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
+import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedselsnummer;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
@@ -23,7 +23,7 @@ public class FoedselsnummerTest {
 
         gyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, parametereForOrdinærValidator()).erNestenGyldig())
+                        assertThat(foedselsnummer(fnr, parametereForOrdinærValidator()).erNestenGyldig())
                                 .isTrue()
                 );
     }
@@ -38,7 +38,7 @@ public class FoedselsnummerTest {
 
         gyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, parametereForKasperMedSemikolonValidator()).erNestenGyldig())
+                        assertThat(foedselsnummer(fnr, parametereForKasperMedSemikolonValidator()).erNestenGyldig())
                                 .isTrue()
                 );
     }
@@ -58,13 +58,13 @@ public class FoedselsnummerTest {
 
         ugyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, validatorParametere).erGyldig())
+                        assertThat(foedselsnummer(fnr, validatorParametere).erGyldig())
                                 .isFalse()
                 );
 
         ugyldigeFødselsnummere
                 .forEach(fnr ->
-                        assertThat(foedslesnummer(fnr, validatorParametere).erNestenGyldig())
+                        assertThat(foedselsnummer(fnr, validatorParametere).erNestenGyldig())
                                 .isFalse()
                 );
     }
@@ -74,17 +74,17 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametere = parametereForOrdinærValidator();
 
         assertThat(
-                foedslesnummer("11111111111", validatorParametere)
+                foedselsnummer("11111111111", validatorParametere)
         )
                 .isEqualTo(
-                        foedslesnummer("11111111111", validatorParametere)
+                        foedselsnummer("11111111111", validatorParametere)
                 );
 
         assertThat(
-                foedslesnummer("11111111111", validatorParametere)
+                foedselsnummer("11111111111", validatorParametere)
         )
                 .isNotEqualTo(
-                        foedslesnummer("11111111112", validatorParametere)
+                        foedselsnummer("11111111112", validatorParametere)
                 );
     }
 
@@ -93,7 +93,7 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametereForOrdinær = parametereForOrdinærValidator();
 
         assertThat(
-                foedslesnummer("11111122222", validatorParametereForOrdinær)
+                foedselsnummer("11111122222", validatorParametereForOrdinær)
                         .fødselsdato()
         )
                 .isEqualTo(
@@ -103,7 +103,7 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametereForKasper = parametereForKasperValidator();
 
         assertThat(
-                foedslesnummer("3311111122222", validatorParametereForKasper)
+                foedselsnummer("3311111122222", validatorParametereForKasper)
                         .fødselsdato()
         )
                 .isEqualTo(
@@ -113,7 +113,7 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametereForKasperMedSemikolon = parametereForKasperMedSemikolonValidator();
 
         assertThat(
-                foedslesnummer("33111111;22222", validatorParametereForKasperMedSemikolon)
+                foedselsnummer("33111111;22222", validatorParametereForKasperMedSemikolon)
                         .fødselsdato()
         )
                 .isEqualTo(
@@ -126,7 +126,7 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametereForOrdinær = parametereForOrdinærValidator();
 
         assertThat(
-                foedslesnummer("11111122222", validatorParametereForOrdinær)
+                foedselsnummer("11111122222", validatorParametereForOrdinær)
                         .personnummer()
         )
                 .isEqualTo(
@@ -136,7 +136,7 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametereForKasper = parametereForKasperValidator();
 
         assertThat(
-                foedslesnummer("3311111122222", validatorParametereForKasper)
+                foedselsnummer("3311111122222", validatorParametereForKasper)
                         .personnummer()
         )
                 .isEqualTo(
@@ -146,7 +146,7 @@ public class FoedselsnummerTest {
         final ValidatorParametere validatorParametereForKasperMedSemikolon = parametereForKasperMedSemikolonValidator();
 
         assertThat(
-                foedslesnummer("33111111;22222", validatorParametereForKasperMedSemikolon)
+                foedselsnummer("33111111;22222", validatorParametereForKasperMedSemikolon)
                         .personnummer()
         )
                 .isEqualTo(
@@ -157,7 +157,7 @@ public class FoedselsnummerTest {
     @Test
     public void skal_ha_menneskevennlig_toString() {
         final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
-        final Foedselsnummer fødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        final Foedselsnummer fødselsnummer = foedselsnummer("33111111;22222", validatorParametere);
         assertThat(
                 fødselsnummer
                         .toString()

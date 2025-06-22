@@ -12,7 +12,7 @@ public class Foedselsnummer {
         validator = FoedselsnummerValidator.foedselsnummerValidator(fødselsnummer, validatorParametere);
     }
 
-    public static Foedselsnummer foedslesnummer(final String fødselsnummer, final ValidatorParametere validatorParametere) {
+    public static Foedselsnummer foedselsnummer(final String fødselsnummer, final ValidatorParametere validatorParametere) {
         return new Foedselsnummer(fødselsnummer, validatorParametere);
     }
 

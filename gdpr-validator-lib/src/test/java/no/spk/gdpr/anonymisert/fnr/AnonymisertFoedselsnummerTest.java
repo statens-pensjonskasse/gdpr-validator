@@ -1,6 +1,6 @@
 package no.spk.gdpr.anonymisert.fnr;
 
-import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
+import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedselsnummer;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperMedSemikolonValidator;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForKasperValidator;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
@@ -21,26 +21,26 @@ public class AnonymisertFoedselsnummerTest {
 
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
-                        foedslesnummer("11111111111", validatorParametere),
+                        foedselsnummer("11111111111", validatorParametere),
                         validatorParametere
                 )
         )
                 .isEqualTo(
                         AnonymisertFoedselsnummer.fraFoedselsnummer(
-                                foedslesnummer("11111111111", validatorParametere),
+                                foedselsnummer("11111111111", validatorParametere),
                                 validatorParametere
                         )
                 );
 
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
-                        foedslesnummer("11111111111", validatorParametere),
+                        foedselsnummer("11111111111", validatorParametere),
                         validatorParametere
                 )
         )
                 .isNotEqualTo(
                         AnonymisertFoedselsnummer.fraFoedselsnummer(
-                                foedslesnummer("11111111112", validatorParametere),
+                                foedselsnummer("11111111112", validatorParametere),
                                 validatorParametere
                         )
                 );
@@ -49,7 +49,7 @@ public class AnonymisertFoedselsnummerTest {
     @Test
     public void skal_være_like_langt_unanonymt_ordinært_fødselsnummer() {
         final ValidatorParametere validatorParametere = parametereForOrdinærValidator();
-        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("11111111111", validatorParametere);
+        final Foedselsnummer unanonymtFødselsnummer = foedselsnummer("11111111111", validatorParametere);
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
                         unanonymtFødselsnummer,
@@ -68,7 +68,7 @@ public class AnonymisertFoedselsnummerTest {
     @Test
     public void skal_være_like_langt_unanonymt_kasper_fødselsnummer() {
         final ValidatorParametere validatorParametere = parametereForKasperValidator();
-        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("3311111122222", validatorParametere);
+        final Foedselsnummer unanonymtFødselsnummer = foedselsnummer("3311111122222", validatorParametere);
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
                         unanonymtFødselsnummer,
@@ -87,7 +87,7 @@ public class AnonymisertFoedselsnummerTest {
     @Test
     public void skal_være_like_langt_unanonymt_kasper_med_semikolon_fødselsnummer() {
         final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
-        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        final Foedselsnummer unanonymtFødselsnummer = foedselsnummer("33111111;22222", validatorParametere);
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
                         unanonymtFødselsnummer,
@@ -106,7 +106,7 @@ public class AnonymisertFoedselsnummerTest {
     @Test
     public void skal_ikke_inneholde_noen_tall_i_personnummeret() {
         final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
-        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        final Foedselsnummer unanonymtFødselsnummer = foedselsnummer("33111111;22222", validatorParametere);
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
                         unanonymtFødselsnummer,
@@ -121,7 +121,7 @@ public class AnonymisertFoedselsnummerTest {
     @Test
     public void skal_ha_menneskevennlig_toString() {
         final ValidatorParametere validatorParametere = parametereForKasperMedSemikolonValidator();
-        final Foedselsnummer unanonymtFødselsnummer = foedslesnummer("33111111;22222", validatorParametere);
+        final Foedselsnummer unanonymtFødselsnummer = foedselsnummer("33111111;22222", validatorParametere);
         assertThat(
                 AnonymisertFoedselsnummer.fraFoedselsnummer(
                         unanonymtFødselsnummer,

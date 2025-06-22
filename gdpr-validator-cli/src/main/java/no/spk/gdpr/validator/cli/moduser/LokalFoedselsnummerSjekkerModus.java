@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static no.spk.gdpr.validator.cli.Oppsummering.lagOppsummering;
 import static no.spk.gdpr.validator.cli.Resultat.resultat;
 import static no.spk.gdpr.validator.cli.UtgangsInnstillinger.visAlleUtgangsvariabler;
-import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
+import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedselsnummer;
 import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinærValidator;
 
 import java.io.File;
@@ -23,8 +23,6 @@ import no.spk.gdpr.validator.cli.util.Util;
 import no.spk.gdpr.validator.cli.Resultat;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
-
-import org.jetbrains.annotations.NotNull;
 
 public class LokalFoedselsnummerSjekkerModus {
 
@@ -131,7 +129,7 @@ public class LokalFoedselsnummerSjekkerModus {
                     .findAll(fødselsnummerRegex)
                     .map(MatchResult::group)
                     .map(potensieltFødselsnummer ->
-                            resultat(foedslesnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath())
+                            resultat(foedselsnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath())
                     );
         } catch (FileNotFoundException e) {
             System.out.printf("Fant ikke fil: %s%n", fil.getAbsolutePath());

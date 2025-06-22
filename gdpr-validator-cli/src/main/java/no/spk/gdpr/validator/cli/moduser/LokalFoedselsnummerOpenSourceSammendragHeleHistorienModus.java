@@ -1,26 +1,23 @@
 package no.spk.gdpr.validator.cli.moduser;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.summingInt;
+import static java.util.stream.Collectors.teeing;
 import static java.util.stream.StreamSupport.stream;
-import static no.spk.gdpr.validator.cli.Oppsummering.lagOppsummering;
-import static no.spk.gdpr.validator.cli.Resultat.resultat;
+import static no.spk.gdpr.validator.cli.util.Tuple.tuple;
 import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedselsnummer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
+import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import no.spk.gdpr.validator.cli.Oppsummering;
-import no.spk.gdpr.validator.cli.Resultat;
-import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
+import no.spk.gdpr.validator.cli.util.Tuple;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
 
 import org.eclipse.jgit.api.Git;
@@ -37,66 +34,59 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
-public class LokalFoedselsnummerSjekkerHeleHistorienModus {
+public class LokalFoedselsnummerOpenSourceSammendragHeleHistorienModus {
 
     private final Pattern fødselsnummerRegex;
     private final ValidatorParametere validatorParametere;
-    private final UtgangsInnstillinger utgangsInnstillinger;
 
     private final String bane;
-    private Optional<Oppsummering> oppsummering;
 
-    private LokalFoedselsnummerSjekkerHeleHistorienModus(
+    private LokalFoedselsnummerOpenSourceSammendragHeleHistorienModus(
             final String bane,
-            final ValidatorParametere validatorParametere,
-            final UtgangsInnstillinger utgangsInnstillinger
+            final ValidatorParametere validatorParametere
     ) {
         this.bane = requireNonNull(bane, "bane var påkrevd, men var null");
         this.validatorParametere = requireNonNull(validatorParametere, "validatorParametere var påkrevd, men var null");
         this.fødselsnummerRegex = validatorParametere.mønster();
-        this.utgangsInnstillinger = requireNonNull(utgangsInnstillinger, "utgangsInnstillinger var påkrevd, men var null");
-
-        oppsummering = Optional.of(Oppsummering.initier()).filter(x -> utgangsInnstillinger.visOppsummering());
     }
 
-    public static LokalFoedselsnummerSjekkerHeleHistorienModus lokalFoedselsnummerSjekkerHeleHistorienModus(
+    public static LokalFoedselsnummerOpenSourceSammendragHeleHistorienModus lokalFoedselsnummerOpenSourceSammendragHeleHistorienModus(
             final String bane,
-            final ValidatorParametere validatorParametere,
-            final UtgangsInnstillinger utgangsInnstillinger
+            final ValidatorParametere validatorParametere
     ) {
-        return new LokalFoedselsnummerSjekkerHeleHistorienModus(bane, validatorParametere, utgangsInnstillinger);
+        return new LokalFoedselsnummerOpenSourceSammendragHeleHistorienModus(bane, validatorParametere);
     }
 
     public void kjør() {
-        letIHeleGitLoggen();
 
-        oppsummering
-                .map(Oppsummering::toString)
-                .ifPresent(System.out::println);
+        System.out.printf(
+                """
+                        Oppsummering:%n%nFødselsnummer datoformat %s og mønster %s
+                        
+                        Starter %s
+                        """,
+                validatorParametere.fødselsdatoMønster(),
+                validatorParametere.mønster(),
+                LocalDateTime.now()
+                );
+
+        final Tuple<Integer, Integer> antall = scanEnFilOgGitHistorikk();
+
+        System.out.printf(
+                """
+                        Avsluttet %s
+                        
+                        Fant %d fødselsnummere:
+                            - %d er gyldig(e)
+                        
+                        """,
+                LocalDateTime.now(),
+                antall.andre(),
+                antall.første()
+        );
     }
 
-    private void letIHeleGitLoggen() {
-
-        if (oppsummering.isPresent()) {
-            oppsummering = oppsummering
-                    .map(
-                            eksisterende ->
-                                    eksisterende
-                                            .pluss(
-                                                    lagOppsummering(
-                                                            scanEnFilOgGitHistorikk()
-                                                                    .peek(this::skrivUt)
-                                                                    .toList()
-                                                    )
-                                            )
-                    );
-        } else {
-            scanEnFilOgGitHistorikk()
-                    .forEach(this::skrivUt);
-        }
-    }
-
-    private Stream<Resultat> scanEnFilOgGitHistorikk() {
+    private Tuple<Integer, Integer> scanEnFilOgGitHistorikk() {
         final Repository repo;
         try {
             repo = new FileRepositoryBuilder()
@@ -110,14 +100,17 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
             return alleCommits(git)
                     .filter(commit -> commit.getParentCount() > 0)
                     .flatMap(commit -> finnAlleDifferICommitten(commit, repo, git))
-                    .flatMap(commitOgDiff -> finnAlleFødselsnummereIDiffen(commitOgDiff, repo));
+                    .flatMap(commitOgDiff -> finnAlleFødselsnummereIDiffen(commitOgDiff, repo))
+                    .collect(
+                            teeing(
+                                    summingInt(Tuple::første),
+                                    summingInt(Tuple::andre),
+                                    Tuple::new
+                            )
+                    );
         } catch (GitAPIException | IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void skrivUt(final Resultat r) {
-        System.out.println(r.filtrertOutput(utgangsInnstillinger));
     }
 
     private static Stream<RevCommit> alleCommits(final Git git) throws GitAPIException, IOException {
@@ -143,26 +136,18 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
         }
     }
 
-    private Stream<Resultat> finnAlleFødselsnummereIDiffen(final CommitOgDiff commitOgDiff, final Repository repo) {
+    private Stream<Tuple<Integer, Integer>> finnAlleFødselsnummereIDiffen(final CommitOgDiff commitOgDiff, final Repository repo) {
         try {
             final ByteArrayOutputStream bs = new ByteArrayOutputStream();
             try (final DiffFormatter formatter = new DiffFormatter(bs)) {
                 formatter.setRepository(repo);
                 formatter.format(commitOgDiff.diff);
 
-                final List<Resultat> resultater = new ArrayList<>();
-                final Matcher fødselsnummerMatcher = fødselsnummerRegex.matcher(bs.toString(UTF_8));
-
-                while (fødselsnummerMatcher.find()) {
-                    resultater.add(
-                            resultat(
-                                    foedselsnummer(fødselsnummerMatcher.group("fnr"), validatorParametere),
-                                    lagFilnavn(commitOgDiff.commit, commitOgDiff.diff)
-                            )
-                    );
-                }
-
-                return resultater.stream();
+                return fødselsnummerRegex.matcher(bs.toString(UTF_8))
+                        .results()
+                        .map(matchResult -> matchResult.group("fnr"))
+                        .map(match -> foedselsnummer(match, validatorParametere))
+                        .map(fnr -> tuple(fnr.erGyldig() ? 1 : 0, 1));
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

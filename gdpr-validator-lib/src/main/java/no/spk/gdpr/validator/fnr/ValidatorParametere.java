@@ -134,7 +134,7 @@ public class ValidatorParametere {
         return fødselsnummerLengde;
     }
 
-    String fødselsdatoMønster() {
+    public String fødselsdatoMønster() {
         return fødselsdatoMønster;
     }
 }
