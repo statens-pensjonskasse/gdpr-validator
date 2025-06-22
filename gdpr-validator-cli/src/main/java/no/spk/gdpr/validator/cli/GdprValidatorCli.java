@@ -142,7 +142,7 @@ public class GdprValidatorCli implements Callable<Integer> {
             final String bane,
             final List<String> filtyper,
             final UtgangsInnstillinger utgangsInnstillinger
-    ) throws IOException, GitAPIException {
+    ) throws IOException {
 
         final ValidatorParametere parametere = velgParametereFraCmdLineArgs(fnrtype);
 

@@ -3,6 +3,7 @@ package no.spk.gdpr.validator.cli.moduser;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
+import static no.spk.gdpr.validator.cli.Oppsummering.lagOppsummering;
 import static no.spk.gdpr.validator.cli.Resultat.resultat;
 import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
 
@@ -12,10 +13,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import no.spk.gdpr.validator.cli.Oppsummering;
 import no.spk.gdpr.validator.cli.Resultat;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
@@ -33,6 +36,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.jetbrains.annotations.NotNull;
 
 public class LokalFoedselsnummerSjekkerHeleHistorienModus {
 
@@ -41,7 +45,7 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
     private final UtgangsInnstillinger utgangsInnstillinger;
 
     private final String bane;
-    private final List<Resultat> resultater;
+    private Optional<Oppsummering> oppsummering;
 
     private LokalFoedselsnummerSjekkerHeleHistorienModus(
             final String bane,
@@ -53,7 +57,7 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
         this.fødselsnummerRegex = validatorParametere.mønster();
         this.utgangsInnstillinger = requireNonNull(utgangsInnstillinger, "utgangsInnstillinger var påkrevd, men var null");
 
-        resultater = new ArrayList<>();
+        oppsummering = Optional.of(Oppsummering.initier()).filter(x -> utgangsInnstillinger.visOppsummering());
     }
 
     public static LokalFoedselsnummerSjekkerHeleHistorienModus lokalFoedselsnummerSjekkerHeleHistorienModus(
@@ -64,32 +68,57 @@ public class LokalFoedselsnummerSjekkerHeleHistorienModus {
         return new LokalFoedselsnummerSjekkerHeleHistorienModus(bane, validatorParametere, utgangsInnstillinger);
     }
 
-    public void kjør() throws IOException, GitAPIException {
+    public void kjør() {
         letIHeleGitLoggen();
 
-        if (utgangsInnstillinger.visOppsummering()) {
-            System.out.println(Resultat.lagOppsummering(resultater));
-        }
-
-        resultater
-                .forEach(r -> System.out.println(r.filtrertOutput(utgangsInnstillinger)));
+        oppsummering
+                .map(Oppsummering::toString)
+                .ifPresent(System.out::println);
     }
 
-    private void letIHeleGitLoggen() throws IOException, GitAPIException {
-        final Repository repo = new FileRepositoryBuilder()
-                .setGitDir(new File(bane + "/.git"))
-                .build();
+    private void letIHeleGitLoggen() {
+
+        if (oppsummering.isPresent()) {
+            oppsummering = oppsummering
+                    .map(
+                            eksisterende ->
+                                    eksisterende
+                                            .pluss(
+                                                    lagOppsummering(
+                                                            scanEnFilOgGitHistorikk()
+                                                                    .peek(this::skrivUt)
+                                                                    .toList()
+                                                    )
+                                            )
+                    );
+        } else {
+            scanEnFilOgGitHistorikk()
+                    .forEach(this::skrivUt);
+        }
+    }
+
+    private Stream<Resultat> scanEnFilOgGitHistorikk() {
+        final Repository repo;
+        try {
+            repo = new FileRepositoryBuilder()
+                    .setGitDir(new File(bane + "/.git"))
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         try (final Git git = new Git(repo)) {
-            resultater.addAll(
-                    alleCommits(git)
-                            .parallel()
-                            .filter(commit -> commit.getParentCount() > 0)
-                            .flatMap(commit -> finnAlleDifferICommitten(commit, repo, git))
-                            .flatMap(commitOgDiff -> finnAlleFødselsnummereIDiffen(commitOgDiff, repo))
-                            .toList()
-            );
+            return alleCommits(git)
+                    .filter(commit -> commit.getParentCount() > 0)
+                    .flatMap(commit -> finnAlleDifferICommitten(commit, repo, git))
+                    .flatMap(commitOgDiff -> finnAlleFødselsnummereIDiffen(commitOgDiff, repo));
+        } catch (GitAPIException | IOException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private void skrivUt(final Resultat r) {
+        System.out.println(r.filtrertOutput(utgangsInnstillinger));
     }
 
     private static Stream<RevCommit> alleCommits(final Git git) throws GitAPIException, IOException {

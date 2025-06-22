@@ -1,6 +1,8 @@
 package no.spk.gdpr.validator.cli.moduser;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static no.spk.gdpr.validator.cli.Oppsummering.lagOppsummering;
 import static no.spk.gdpr.validator.cli.Resultat.resultat;
 import static no.spk.gdpr.validator.cli.UtgangsInnstillinger.visAlleUtgangsvariabler;
 import static no.spk.gdpr.validator.fnr.Foedselsnummer.foedslesnummer;
@@ -8,18 +10,21 @@ import static no.spk.gdpr.validator.fnr.ValidatorParametere.parametereForOrdinæ
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import no.spk.gdpr.validator.cli.Oppsummering;
 import no.spk.gdpr.validator.cli.util.Util;
 import no.spk.gdpr.validator.cli.Resultat;
 import no.spk.gdpr.validator.cli.UtgangsInnstillinger;
 import no.spk.gdpr.validator.fnr.ValidatorParametere;
+
+import org.jetbrains.annotations.NotNull;
 
 public class LokalFoedselsnummerSjekkerModus {
 
@@ -30,7 +35,7 @@ public class LokalFoedselsnummerSjekkerModus {
     private final String bane;
     private final List<String> filtyper;
     private final boolean skalFiltrerePåFiletternavn;
-    private final List<Resultat> resultater;
+    private Optional<Oppsummering> oppsummering;
 
     private LokalFoedselsnummerSjekkerModus(
             final String bane,
@@ -52,7 +57,8 @@ public class LokalFoedselsnummerSjekkerModus {
         this.utgangsInnstillinger = requireNonNull(utgangsInnstillinger, "utgangsInnstillinger var påkrevd, men var null");
 
         skalFiltrerePåFiletternavn = !filtyper.isEmpty();
-        resultater = new ArrayList<>();
+
+        oppsummering = Optional.of(Oppsummering.initier()).filter(x -> utgangsInnstillinger.visOppsummering());
     }
 
     public static LokalFoedselsnummerSjekkerModus lokalFoedselsnummerSjekkerModus(
@@ -74,17 +80,18 @@ public class LokalFoedselsnummerSjekkerModus {
     public void kjør() throws FileNotFoundException {
         sjekk(new File(bane));
 
-        if (utgangsInnstillinger.visOppsummering()) {
-            System.out.println(Resultat.lagOppsummering(resultater));
-        }
+        oppsummering
+                .map(Oppsummering::toString)
+                .ifPresent(System.out::println);
+    }
 
-        resultater
-                .forEach(r -> System.out.println(r.filtrertOutput(utgangsInnstillinger)));
+    private void skrivUt(final Resultat r) {
+        System.out.println(r.filtrertOutput(utgangsInnstillinger));
     }
 
     private void sjekk(final File fil) throws FileNotFoundException {
         if (fil == null || !fil.exists()) {
-            throw new FileNotFoundException(String.format("Filen/katalogen eksisterer ikke: %s.", fil != null ? fil.getAbsolutePath() : "null"));
+            throw new FileNotFoundException(format("Filen/katalogen eksisterer ikke: %s.", fil != null ? fil.getAbsolutePath() : "null"));
         } else if (fil.isFile()) {
             sjekkEnkeltfil(fil);
         } else if (fil.isDirectory()) {
@@ -94,20 +101,42 @@ public class LokalFoedselsnummerSjekkerModus {
         }
     }
 
-    private void sjekkEnkeltfil(final File fil) throws FileNotFoundException {
+    private void sjekkEnkeltfil(final File fil) {
         if (skalFiltrerePåFiletternavn && !filetternavnetErRelevant(fil)) {
             return;
         }
 
-        resultater.addAll(
-                new Scanner(fil)
-                        .findAll(fødselsnummerRegex)
-                        .map(MatchResult::group)
-                        .map(potensieltFødselsnummer ->
-                                resultat(foedslesnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath())
-                        )
-                        .toList()
-                );
+        if (oppsummering.isPresent()) {
+            oppsummering = oppsummering
+                    .map(
+                            eksisterende ->
+                                    eksisterende
+                                            .pluss(
+                                                    lagOppsummering(
+                                                            scanEnFil(fil)
+                                                                    .peek(this::skrivUt)
+                                                                    .toList()
+                                                    )
+                                            )
+                    );
+        } else {
+            scanEnFil(fil)
+                    .forEach(this::skrivUt);
+        }
+    }
+
+    private Stream<Resultat> scanEnFil(final File fil) {
+        try {
+            return new Scanner(fil)
+                    .findAll(fødselsnummerRegex)
+                    .map(MatchResult::group)
+                    .map(potensieltFødselsnummer ->
+                            resultat(foedslesnummer(potensieltFødselsnummer, validatorParametere), fil.getAbsolutePath())
+                    );
+        } catch (FileNotFoundException e) {
+            System.out.printf("Fant ikke fil: %s%n", fil.getAbsolutePath());
+        }
+        return Stream.empty();
     }
 
     private boolean filetternavnetErRelevant(final File fil) {
