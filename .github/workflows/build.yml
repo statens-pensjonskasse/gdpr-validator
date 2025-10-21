@@ -8,8 +8,7 @@ permissions:
   contents: write  # kreves for å pushe tag og opprette release
 
 jobs:
-  release:
-    # ikke kjør hvis commit inneholder skip actions
+  release: # ikke kjør hvis commit inneholder skip actions
     if: !contains(github.event.head_commit.message, '[skip actions]')
     runs-on: ubuntu-latest
 
