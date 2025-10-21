@@ -1,18 +1,45 @@
-name: Build and Publish Library with Maven
+name: Release from [release] commits (Maven)
 
 on:
   push:
-  workflow_dispatch:
+    branches: [ "main" ]  # endre ved behov
+
+permissions:
+  contents: write  # kreves for å pushe tag og opprette release
 
 jobs:
-  build:
-    uses: statens-pensjonskasse/github-actions-library/.github/workflows/build-library-maven.yaml@a092c377743341dedbdf219294d3a07f1c741849 # v1.41.6
-    permissions:
-      contents: write
-      packages: write
-    secrets: inherit
-    with:
-      java-version: 21
-      slack-channel: '#panda-ci'
-      slack-bot-name: "GH-Actions CI"
-      slack-bot-icon: ':panda_face:'
+  release:
+    # ikke kjør hvis commit inneholder skip actions
+    if: !contains(github.event.head_commit.message, '[skip actions]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B verify
+
+      - name: Collect build files
+        run: |
+          mkdir -p dist
+          shopt -s globstar || true
+          cp **/target/* dist/ 2>/dev/null
+          ls -lah dist
+
+      - name: Upload build artifacts (snapshot)
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-build
+          path: dist/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
