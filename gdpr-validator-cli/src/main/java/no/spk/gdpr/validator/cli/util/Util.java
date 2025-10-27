@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import no.spk.gdpr.validator.cli.FantIkkeGitRepositoryException;
 
-import org.assertj.core.util.Lists;
-
 public class Util {
 
     public static String filetternavn(final File fil) {
@@ -44,7 +42,7 @@ public class Util {
     }
 
     public static void klonRepo(final String url) {
-        kommandoHjelper().kjoerKommando(Lists.newArrayList("git", "clone", url, repositorynavn(url)));
+        kommandoHjelper().kjoerKommando(List.of("git", "clone", url, repositorynavn(url)));
     }
 
     private static boolean harFiletternavn(final String fil) {

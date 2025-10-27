@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>no.spk</groupId>
-        <artifactId>spk-root-pom</artifactId>
-        <version>131.0.5</version>
-    </parent>
 
     <groupId>no.spk.gdpr.validator</groupId>
 
@@ -41,16 +36,21 @@
 
         <slf4j.version>2.0.17</slf4j.version>
         <picocli.version>4.7.7</picocli.version>
-        <commons-io.version>2.19.0</commons-io.version>
         <commonmark.version>0.24.0</commonmark.version>
         <jgit.version>7.2.1.202505142326-r</jgit.version>
 
         <junit-5.version>5.13.0</junit-5.version>
         <assertj.version>3.27.3</assertj.version>
 
+
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+
+        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+        <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
         <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
@@ -62,7 +62,6 @@
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -81,6 +80,7 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
@@ -93,11 +93,6 @@
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>${picocli.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.commonmark</groupId>
@@ -190,6 +185,14 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>${maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -216,6 +219,25 @@
                     <groupId>io.github.git-commit-id</groupId>
                     <artifactId>git-commit-id-maven-plugin</artifactId>
                     <version>9.0.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>add-source</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${project.build.directory}/src/generated/</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -300,6 +322,26 @@
                         <goals>
                             <goal>verify</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.3</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
