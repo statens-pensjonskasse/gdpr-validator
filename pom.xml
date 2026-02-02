@@ -40,7 +40,7 @@
         <jgit.version>7.2.1.202505142326-r</jgit.version>
 
         <junit-5.version>5.13.0</junit-5.version>
-        <assertj.version>3.27.3</assertj.version>
+        <assertj.version>3.27.7</assertj.version>
 
 
         <java.version>21</java.version>
