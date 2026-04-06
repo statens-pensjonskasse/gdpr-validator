@@ -36,7 +36,7 @@
 
         <slf4j.version>2.0.17</slf4j.version>
         <picocli.version>4.7.7</picocli.version>
-        <commonmark.version>0.27.1</commonmark.version>
+        <commonmark.version>0.28.0</commonmark.version>
         <jgit.version>7.6.0.202603022253-r</jgit.version>
 
         <junit-5.version>6.0.3</junit-5.version>
@@ -218,7 +218,7 @@
                 <plugin>
                     <groupId>io.github.git-commit-id</groupId>
                     <artifactId>git-commit-id-maven-plugin</artifactId>
-                    <version>9.0.2</version>
+                    <version>9.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
